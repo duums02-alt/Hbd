@@ -32,9 +32,9 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 .cat-scene{display:flex;flex-direction:column;align-items:center;gap:0;margin-bottom:8px}
 .cat-bubble{
   position:relative;background:#fff;border:2px solid var(--rose);
-  border-radius:16px;padding:8px 15px;font-size:.8rem;font-weight:700;
+  border-radius:16px;padding:10px 18px;font-size:.85rem;font-weight:700;
   color:var(--text);box-shadow:0 3px 12px rgba(0,0,0,.07);
-  text-align:center;max-width:210px;line-height:1.4;margin-bottom:9px;
+  text-align:center;max-width:240px;line-height:1.5;margin-bottom:9px;
   animation:bPop .4s cubic-bezier(.34,1.56,.64,1) both;
 }
 .cat-bubble::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#fff;filter:drop-shadow(0 2px 1px rgba(0,0,0,.05))}
@@ -48,7 +48,7 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 @keyframes tailWag{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(20deg)}}
 @keyframes bodyB{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes pantT{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.28)}}
-@keyframes confused{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+@keyframes confused{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
 @keyframes dance{0%{transform:rotate(-9deg) translateY(0)}25%{transform:rotate(9deg) translateY(-7px)}50%{transform:rotate(-7deg) translateY(0)}75%{transform:rotate(7deg) translateY(-5px)}100%{transform:rotate(-9deg) translateY(0)}}
 @keyframes sleepB{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes zUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-30px) scale(1.55);opacity:0}}
@@ -59,41 +59,64 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 @keyframes blinkA{0%,100%{opacity:1}50%{opacity:.35}}
 @keyframes slideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes catRunForever{0%{transform:translateX(0)}100%{transform:translateX(0)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-10deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(8deg)}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
+@keyframes spinPop{0%{transform:scale(0) rotate(-180deg);opacity:0}70%{transform:scale(1.2) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes wiggle{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
 
 /* ── COUNTDOWN ── */
-#pg-cd{background:radial-gradient(ellipse at 40% 65%, #fce4ec 0%, var(--cream) 65%);text-align:center;gap:0}
-.cd-label{font-size:.68rem;letter-spacing:4px;text-transform:uppercase;color:var(--pink-d);margin-bottom:8px}
-.cd-name{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,7.5vw,4rem);color:var(--pink-dd);line-height:1.1;margin-bottom:5px}
-.cd-tag{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(.85rem,2.8vw,1.2rem);color:var(--pink-d);margin-bottom:28px}
-.ring-wrap{position:relative;width:136px;height:136px;margin:0 auto 16px}
+#pg-cd{background:radial-gradient(ellipse at 40% 65%, #fce4ec 0%, var(--cream) 65%);text-align:center;gap:12px}
+.cd-label{font-size:.68rem;letter-spacing:4px;text-transform:uppercase;color:var(--pink-d);margin-bottom:0}
+.cd-name{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,7.5vw,4rem);color:var(--pink-dd);line-height:1.1}
+.cd-tag{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(.85rem,2.8vw,1.2rem);color:var(--pink-d)}
+.ring-wrap{position:relative;width:136px;height:136px;margin:0 auto}
 .ring-wrap svg{transform:rotate(-90deg)}
 .ring-bg{fill:none;stroke:#fce4ec;stroke-width:8}
 .ring-fill{fill:none;stroke:var(--pink-d);stroke-width:8;stroke-linecap:round;stroke-dasharray:390;stroke-dashoffset:0;transition:stroke-dashoffset .9s ease}
-.cd-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:3.1rem;color:var(--pink-dd)}
+.cd-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:3.1rem;color:var(--pink-dd);transition:transform .15s}
+.cd-num.pop{animation:bPop .35s cubic-bezier(.34,1.56,.64,1)}
+
+/* Cat running track on countdown */
+.cd-track-wrap{width:100%;max-width:280px;position:relative;height:80px;overflow:hidden}
+.cd-track-floor{position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--pink-d),transparent)}
+#cd-runner{position:absolute;bottom:2px;left:-90px}
+
+/* Next button */
+.next-btn{display:block;width:100%;max-width:280px;padding:14px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--pink-d),var(--pink-dd));color:#fff;font-size:.92rem;font-weight:800;font-family:'Nunito';cursor:pointer;box-shadow:0 5px 16px rgba(224,107,154,.4);transition:transform .15s,box-shadow .15s;animation:slideUp .5s ease both;margin-top:4px}
+.next-btn:active{transform:scale(.97);box-shadow:0 2px 8px rgba(224,107,154,.3)}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(224,107,154,.45)}
+.next-btn-wrap{display:none;flex-direction:column;align-items:center;gap:8px;width:100%}
+.next-btn-wrap.show{display:flex}
 
 /* ── GIFT ── */
-#pg-gift{background:radial-gradient(ellipse at 50% 45%, #fce4ec 0%, var(--cream) 65%);text-align:center;gap:0}
-.gift-title{font-family:'Playfair Display',serif;font-size:clamp(1.1rem,4vw,1.8rem);color:var(--pink-dd);margin-bottom:14px}
-.track{position:relative;width:100%;max-width:300px;height:94px;margin:0 auto 6px;overflow:hidden}
+#pg-gift{background:radial-gradient(ellipse at 50% 45%, #fce4ec 0%, var(--cream) 65%);text-align:center;gap:12px}
+.gift-title{font-family:'Playfair Display',serif;font-size:clamp(1.1rem,4vw,1.8rem);color:var(--pink-dd)}
+.track{position:relative;width:100%;max-width:320px;height:94px;margin:0 auto;overflow:hidden}
 .track-line{position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--pink-d),transparent)}
 .wall-el{position:absolute;right:3px;bottom:0;top:0;width:5px;border-radius:3px 0 0 3px;background:linear-gradient(180deg,#fda4af,var(--pink-d))}
 .stars-el{position:absolute;right:10px;top:6px;display:none}
 .stars-el.on{display:block;animation:catIn .3s ease both}
 #cat-run-el{position:absolute;bottom:2px;left:-88px}
-.gift-phase{display:none;text-align:center;animation:pgIn .55s ease both}
-.giftbox{cursor:pointer;display:inline-block;filter:drop-shadow(0 10px 20px rgba(224,107,154,.3));animation:gFloat 3s ease-in-out infinite;transition:transform .15s}
+.gift-phase{display:none;flex-direction:column;align-items:center;gap:10px;animation:pgIn .55s ease both}
+.gift-phase.show{display:flex}
+.giftbox{cursor:pointer;display:inline-block;filter:drop-shadow(0 10px 20px rgba(224,107,154,.3));animation:bounce 2s ease-in-out infinite;transition:transform .15s}
 .giftbox:active{transform:scale(.93)}
-.giftbox.shk{animation:gFloat 3s ease-in-out infinite,gShake .3s ease}
+.giftbox.shk{animation:shake .3s ease,bounce 2s ease-in-out infinite 0.3s}
 .giftbox.exp{animation:gExp .42s ease forwards!important}
-@keyframes gFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
-@keyframes gShake{0%,100%{transform:rotate(0)}30%{transform:rotate(-7deg)}70%{transform:rotate(7deg)}}
 @keyframes gExp{0%{transform:scale(1);opacity:1}60%{transform:scale(1.45);opacity:.2}100%{transform:scale(0);opacity:0}}
-.tap-hint{font-size:.78rem;color:var(--muted);margin-top:5px;animation:blinkA 1.8s ease-in-out infinite}
+.tap-hint{font-size:.78rem;color:var(--muted);animation:blinkA 1.8s ease-in-out infinite}
+.tap-progress{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.tap-dot{width:10px;height:10px;border-radius:50%;background:var(--rose);transition:all .3s}
+.tap-dot.done{background:var(--pink-d);transform:scale(1.2)}
 
 /* ── EMPTY (plot twist) ── */
-#pg-empty{background:radial-gradient(ellipse at 50% 50%, #fff0f6 0%, var(--cream) 65%);gap:12px;text-align:center}
-.empty-h{font-family:'Playfair Display',serif;font-size:clamp(1.25rem,4.5vw,1.9rem);color:var(--text);transition:all .3s}
-.empty-sub{font-size:.85rem;color:var(--muted);max-width:240px;line-height:1.7;transition:all .3s}
+#pg-empty{background:radial-gradient(ellipse at 50% 50%, #fff0f6 0%, var(--cream) 65%);gap:16px;text-align:center}
+.empty-h{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,5vw,2rem);color:var(--text);transition:all .4s}
+.empty-sub{font-size:.9rem;color:var(--muted);max-width:260px;line-height:1.8;transition:all .4s}
+.twist-step{display:none;flex-direction:column;align-items:center;gap:14px;width:100%}
+.twist-step.show{display:flex;animation:pgIn .5s ease both}
 
 /* ── LETTER ── */
 #pg-letter{background:linear-gradient(160deg,#fff0f6 0%,var(--cream) 50%,#fef9ec 100%);justify-content:flex-start;padding-top:36px;gap:0}
@@ -111,8 +134,6 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 .lt-to{font-family:'Playfair Display',serif;font-size:1.28rem;color:var(--pink-dd);margin-bottom:11px}
 .lt-body{font-size:.9rem;line-height:1.9;color:#5a4040;white-space:pre-line;margin-bottom:13px}
 .lt-sig{font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;color:var(--pink-d);text-align:right;margin-bottom:13px}
-.next-btn{display:block;width:100%;padding:12px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--pink-d),var(--pink-dd));color:#fff;font-size:.87rem;font-weight:800;font-family:'Nunito';cursor:pointer;box-shadow:0 5px 13px rgba(224,107,154,.35);transition:transform .15s}
-.next-btn:active{transform:scale(.97)}
 
 /* ── GALLERY ── */
 #pg-gallery{background:linear-gradient(180deg,#fff0f6 0%,var(--cream) 100%);justify-content:flex-start;padding-top:34px;gap:0}
@@ -185,10 +206,16 @@ audio{display:none}
 /* ── CONFETTI ── */
 .cf{position:fixed;top:-20px;pointer-events:none;z-index:999;border-radius:2px;animation:cfFall linear forwards}
 @keyframes cfFall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ── SOUND INDICATOR ── */
+.sound-pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:2.5rem;z-index:999;pointer-events:none;transition:all .15s cubic-bezier(.34,1.56,.64,1)}
+.sound-pop.show{transform:translate(-50%,-50%) scale(1)}
+.sound-pop.hide{transform:translate(-50%,-50%) scale(0);opacity:0;transition:all .3s ease}
 </style>
 </head>
 <body>
 <div id="petals"></div>
+<div class="sound-pop" id="sound-pop">🔊</div>
 
 <!-- ═══ ADMIN ═══ -->
 <section class="page" id="pg-admin">
@@ -242,15 +269,28 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
     </svg>
     <div class="cd-num" id="cd-num">5</div>
   </div>
-  <div class="cat-scene">
-    <div class="cat-bubble" id="cd-bub">Hei! Ayo kejar aku!</div>
-    <div class="cat-svg-wrap cat-enter" id="cd-cat"></div>
+
+  <!-- kucing lari di track -->
+  <div class="cd-track-wrap">
+    <div id="cd-runner"></div>
+    <div class="cd-track-floor"></div>
+  </div>
+
+  <div class="cat-scene" style="margin-top:4px">
+    <div class="cat-bubble" id="cd-bub">Hei! Ayo kejar aku! 🏃</div>
+  </div>
+
+  <!-- Tombol next muncul setelah countdown selesai -->
+  <div class="next-btn-wrap" id="cd-next">
+    <button class="next-btn" onclick="startGiftPage()">Oke, aku siap! 🎁</button>
   </div>
 </section>
 
 <!-- ═══ GIFT ═══ -->
 <section class="page" id="pg-gift">
   <div class="gift-title" id="gift-ttl">Tangkap kadonya!</div>
+
+  <!-- Run phase -->
   <div id="run-phase">
     <div class="track" id="track">
       <div id="cat-run-el"></div>
@@ -264,11 +304,19 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
       </div>
       <div class="track-line"></div>
     </div>
+    <!-- crash scene -->
     <div class="cat-scene" id="crash-scene" style="display:none;margin-top:6px">
-      <div class="cat-bubble">Aduh nabrak!! x_x</div>
+      <div class="cat-bubble">ADUH NABRAK!! 😵</div>
       <div class="cat-svg-wrap cat-enter" id="crash-cat"></div>
     </div>
   </div>
+
+  <!-- Next after crash -->
+  <div class="next-btn-wrap" id="crash-next" style="margin-top:10px">
+    <button class="next-btn" onclick="showGiftBox()" style="display:none" id="crash-next-btn">Eh... tapi ada apa tuh? 👀</button>
+  </div>
+
+  <!-- Gift phase -->
   <div class="gift-phase" id="gift-phase">
     <div class="cat-scene">
       <div class="cat-bubble" id="gift-bub">Nih kadonya, tap deh!</div>
@@ -291,25 +339,61 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
         <ellipse cx="38" cy="93" rx="9" ry="4" fill="#fff" opacity=".11" transform="rotate(-18 38 93)"/>
       </svg>
     </div>
+    <div class="tap-progress">
+      <div class="tap-dot" id="tdot0"></div>
+      <div class="tap-dot" id="tdot1"></div>
+      <div class="tap-dot" id="tdot2"></div>
+    </div>
     <div class="tap-hint" id="tap-hint">Tap kado untuk membuka</div>
   </div>
 </section>
 
-<!-- ═══ PLOT TWIST: EMPTY ═══ -->
-<section class="page" id="pg-empty">
+<!-- ═══ PLOT TWIST STEP 1: Kosong ═══ -->
+<section class="page" id="pg-twist1">
   <div class="cat-scene">
-    <div class="cat-bubble" id="empty-bub">Eh... kosong??</div>
-    <div class="cat-svg-wrap cat-enter" id="empty-cat"></div>
+    <div class="cat-bubble" id="tw1-bub">Eh... ini...</div>
+    <div class="cat-svg-wrap cat-enter" id="twist1-cat"></div>
   </div>
-  <div class="empty-h" id="empty-h">Lho kok kosong?!</div>
-  <div class="empty-sub" id="empty-sub">Tunggu... kayaknya ada yang ketinggalan</div>
+  <div class="empty-h" id="tw1-h">Lho kok kosong?! 📦</div>
+  <div class="empty-sub" id="tw1-s">Hmm, tunggu sebentar...</div>
+  <div class="next-btn-wrap" id="tw1-next" style="margin-top:8px;display:none">
+    <button class="next-btn" onclick="goTwist2()">Eh??? 😱</button>
+  </div>
+</section>
+
+<!-- ═══ PLOT TWIST STEP 2: Panik ═══ -->
+<section class="page" id="pg-twist2">
+  <div class="cat-scene">
+    <div class="cat-bubble">Waduh waduh waduh!! Mana mana mana?!</div>
+    <div class="cat-svg-wrap cat-enter" id="twist2-cat"></div>
+  </div>
+  <div class="empty-h">Aduh ketinggalan!! 😱</div>
+  <div class="empty-sub">Kucing lagi nyari sesuatu... sabar ya!</div>
+  <div style="font-size:2.5rem;margin:8px 0;animation:wiggle .4s ease-in-out infinite">🔍</div>
+  <div class="next-btn-wrap" id="tw2-next" style="display:none">
+    <button class="next-btn" onclick="goTwist3()">Udah ketemu belum?? 😅</button>
+  </div>
+</section>
+
+<!-- ═══ PLOT TWIST STEP 3: Nemu! ═══ -->
+<section class="page" id="pg-twist3">
+  <div class="cat-scene">
+    <div class="cat-bubble">OH!! INI DIAAAA!! 🎉</div>
+    <div class="cat-svg-wrap cat-enter" id="twist3-cat"></div>
+  </div>
+  <div class="empty-h" style="color:var(--pink-dd)">Nemu dong! 🎊</div>
+  <div class="empty-sub">Ini yang beneran buat kamu. Maaf bikin deg-degan!</div>
+  <div style="font-size:3rem;margin:8px 0;animation:heartbeat 1s ease-in-out infinite">💌</div>
+  <div class="next-btn-wrap" id="tw3-next" style="display:none">
+    <button class="next-btn" onclick="goTo('pg-letter')">Buka suratnya! 💌</button>
+  </div>
 </section>
 
 <!-- ═══ LETTER ═══ -->
 <section class="page" id="pg-letter">
   <div class="env-wrap">
     <div class="cat-scene" style="margin-bottom:12px">
-      <div class="cat-bubble">*ngos-ngosan* ini... buat kamu</div>
+      <div class="cat-bubble">*ngos-ngosan* ini... buat kamu 🥹</div>
       <div class="cat-svg-wrap cat-enter" id="pant-cat"></div>
     </div>
     <div class="env-scene" id="env" onclick="openEnv()">
@@ -322,7 +406,7 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
       <div class="lt-to" id="u-lto">Dear Sayang,</div>
       <div class="lt-body" id="u-lbody"></div>
       <div class="lt-sig" id="u-sig"></div>
-      <button class="next-btn" onclick="goGallery()">Lihat momen kita</button>
+      <button class="next-btn" onclick="goGallery()">Lihat momen kita 📸</button>
     </div>
   </div>
 </section>
@@ -331,7 +415,7 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
 <section class="page" id="pg-gallery">
   <div class="gal-hd"><div class="gal-title">Momen Kita</div><div class="gal-sub">kenangan indah bersamamu</div></div>
   <div class="cat-scene" style="margin-bottom:11px">
-    <div class="cat-bubble">Yeay lihat foto kita!</div>
+    <div class="cat-bubble">Yeay lihat foto kita! 🐱</div>
     <div class="cat-svg-wrap cat-enter" id="dance-cat"></div>
   </div>
   <div class="slide-wrap">
@@ -342,7 +426,7 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
         <div class="dots" id="dots"></div>
         <button class="nav-b" id="btn-n" onclick="nextSlide()">›</button>
       </div>
-      <button class="finish-btn" id="finish-btn" onclick="goFinal()">Pesan terakhir untukmu</button>
+      <button class="finish-btn" id="finish-btn" onclick="goFinal()">Pesan terakhir untukmu 💕</button>
     </div>
   </div>
 </section>
@@ -350,11 +434,11 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
 <!-- ═══ FINAL ═══ -->
 <section class="page" id="pg-final">
   <div class="cat-scene">
-    <div class="cat-bubble">Capek lari... tapi seneng bisa nyampe *zzz*</div>
+    <div class="cat-bubble">Capek lari... tapi seneng banget bisa nyampe 😻</div>
     <div class="cat-svg-wrap cat-enter" id="sleep-cat"></div>
   </div>
   <div class="final-title" id="u-final-title">Semoga harimu selalu indah</div>
-  <div class="final-msg" id="u-final-msg">Kamu sangat berarti dan dicintai. Selalu.</div>
+  <div class="final-msg" id="u-final-msg">Kamu sangat berarti dan dicintai. Selalu. 💕</div>
 </section>
 
 <div id="audio-bar">
@@ -365,20 +449,206 @@ Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
 </div>
 
 <script>
-/* ── CAT SVG FACTORY ── */
+/* ══════════════════════════════════════
+   SOUND ENGINE - Web Audio API
+══════════════════════════════════════ */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Meow - ngeong klasik kucing
+function soundMeow() {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const t = ctx.currentTime;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, t);
+    osc.frequency.exponentialRampToValueAtTime(900, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(700, t + 0.18);
+    osc.frequency.exponentialRampToValueAtTime(1100, t + 0.3);
+    osc.frequency.exponentialRampToValueAtTime(500, t + 0.55);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.35, t + 0.05);
+    gain.gain.setValueAtTime(0.35, t + 0.35);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+    osc.start(t); osc.stop(t + 0.65);
+
+    // Formant layer
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(400, t);
+    osc2.frequency.exponentialRampToValueAtTime(700, t + 0.3);
+    osc2.frequency.exponentialRampToValueAtTime(350, t + 0.55);
+    gain2.gain.setValueAtTime(0, t);
+    gain2.gain.linearRampToValueAtTime(0.15, t + 0.06);
+    gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+    osc2.start(t); osc2.stop(t + 0.65);
+    showSoundPop('🐱 Meow~');
+  } catch(e){}
+}
+
+// Purr - mendengkur
+function soundPurr(dur=1.5) {
+  try {
+    const ctx = getAudioCtx();
+    const t = ctx.currentTime;
+    // Purr adalah frekuensi rendah bergetar 25-50Hz
+    [0, 0.08, 0.16, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.72].forEach((off, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.value = 130 + (i % 2 === 0 ? 0 : 8);
+      gain.gain.setValueAtTime(0, t + off);
+      gain.gain.linearRampToValueAtTime(0.12, t + off + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + off + 0.07);
+      osc.start(t + off); osc.stop(t + off + 0.07);
+    });
+    showSoundPop('😸 Purrr~');
+  } catch(e){}
+}
+
+// Hiss - mendesis / kaget
+function soundHiss() {
+  try {
+    const ctx = getAudioCtx();
+    const t = ctx.currentTime;
+    // White noise untuk hiss
+    const bufSz = ctx.sampleRate * 0.5;
+    const buf = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSz; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 3000;
+    const gain = ctx.createGain();
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.4, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+    src.start(t); src.stop(t + 0.5);
+
+    // Pitch screech
+    const osc = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    osc.connect(g2); g2.connect(ctx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(400, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.3);
+    g2.gain.setValueAtTime(0.2, t);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    osc.start(t); osc.stop(t + 0.35);
+    showSoundPop('😾 Hissss!');
+  } catch(e){}
+}
+
+// Kaget / cartoon surprised
+function soundSurprise() {
+  try {
+    const ctx = getAudioCtx();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, t);
+    osc.frequency.exponentialRampToValueAtTime(1400, t + 0.12);
+    osc.frequency.exponentialRampToValueAtTime(900, t + 0.25);
+    osc.frequency.exponentialRampToValueAtTime(1600, t + 0.38);
+    osc.frequency.exponentialRampToValueAtTime(400, t + 0.55);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.4, t + 0.04);
+    gain.gain.setValueAtTime(0.35, t + 0.38);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+    osc.start(t); osc.stop(t + 0.65);
+    showSoundPop('😲 !!');
+  } catch(e){}
+}
+
+// Suara happy / yeay
+function soundHappy() {
+  try {
+    const ctx = getAudioCtx();
+    const t = ctx.currentTime;
+    [0, 0.15, 0.3].forEach((off, i) => {
+      const freqs = [523, 659, 784];
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freqs[i];
+      gain.gain.setValueAtTime(0, t + off);
+      gain.gain.linearRampToValueAtTime(0.25, t + off + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + off + 0.2);
+      osc.start(t + off); osc.stop(t + off + 0.25);
+    });
+    showSoundPop('😻 Yeay!');
+  } catch(e){}
+}
+
+// Suara nabrak / crash
+function soundCrash() {
+  try {
+    const ctx = getAudioCtx();
+    const t = ctx.currentTime;
+    // Impact low thud
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(180, t);
+    osc.frequency.exponentialRampToValueAtTime(40, t + 0.25);
+    gain.gain.setValueAtTime(0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    osc.start(t); osc.stop(t + 0.3);
+    // Noise burst
+    const bufSz = ctx.sampleRate * 0.15;
+    const buf = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSz; i++) data[i] = (Math.random() * 2 - 1) * (1 - i/bufSz);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const g2 = ctx.createGain(); g2.gain.value = 0.5;
+    src.connect(g2); g2.connect(ctx.destination);
+    src.start(t); src.stop(t + 0.15);
+    soundHiss();
+    showSoundPop('💥 Bruk!');
+  } catch(e){}
+}
+
+function showSoundPop(text) {
+  const el = document.getElementById('sound-pop');
+  el.textContent = text;
+  el.classList.remove('hide');
+  el.classList.add('show');
+  setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); setTimeout(() => el.classList.remove('hide'), 300); }, 1200);
+}
+
+/* ══════════════════════════════════════
+   CAT SVG FACTORY
+══════════════════════════════════════ */
 const CC={b:'#f5c0a0',bel:'#fde8d8',s:'#e8956d',n:'#e06b9a',e:'#3d2b2b',ck:'#f9a8c9',o:'#c47840'};
-function catSVG(pose,sz=82){
+function catSVG(pose, sz=82){
   const p={
     run:`
-      <ellipse cx="46" cy="53" rx="25" ry="21" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
+      <ellipse cx="46" cy="53" rx="25" ry="21" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4" style="animation:bodyB .18s ease-in-out infinite alternate"/>
       <ellipse cx="46" cy="59" rx="17" ry="13" fill="${CC.bel}"/>
       <path d="M33 46 Q37 42 41 46" stroke="${CC.s}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
       <path d="M51 46 Q55 42 59 46" stroke="${CC.s}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
       <circle cx="46" cy="29" r="19" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
       <polygon points="30,16 24,5 37,14" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
       <polygon points="62,16 68,5 55,14" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
-      <circle cx="39" cy="27" r="3.4" fill="${CC.e}"/><circle cx="53" cy="27" r="3.4" fill="${CC.e}"/>
-      <circle cx="40" cy="26" r="1.3" fill="#fff"/><circle cx="54" cy="26" r="1.3" fill="#fff"/>
+      <circle cx="39" cy="27" r="3.4" fill="${CC.e}"/>
+      <circle cx="53" cy="27" r="3.4" fill="${CC.e}"/>
+      <circle cx="40" cy="26" r="1.3" fill="#fff"/>
+      <circle cx="54" cy="26" r="1.3" fill="#fff"/>
       <ellipse cx="33" cy="32" rx="4.5" ry="2.5" fill="${CC.ck}" opacity=".5"/>
       <ellipse cx="59" cy="32" rx="4.5" ry="2.5" fill="${CC.ck}" opacity=".5"/>
       <ellipse cx="46" cy="33" rx="2.5" ry="1.8" fill="${CC.n}"/>
@@ -387,25 +657,27 @@ function catSVG(pose,sz=82){
       <line x1="22" y1="35" x2="39" y2="35" stroke="${CC.o}" stroke-width=".7" opacity=".5"/>
       <line x1="53" y1="33" x2="70" y2="31" stroke="${CC.o}" stroke-width=".7" opacity=".5"/>
       <line x1="53" y1="35" x2="70" y2="35" stroke="${CC.o}" stroke-width=".7" opacity=".5"/>
-      <path d="M69 55 Q80 46 76 36 Q72 27 78 23" stroke="${CC.s}" stroke-width="4.5" fill="none" stroke-linecap="round" style="animation:tailWag .28s ease-in-out infinite alternate;transform-origin:69px 55px"/>
-      <line x1="36" y1="70" x2="29" y2="82" stroke="${CC.b}" stroke-width="6.5" stroke-linecap="round" style="animation:legRun .22s ease-in-out infinite alternate;transform-origin:36px 70px"/>
-      <line x1="55" y1="70" x2="63" y2="82" stroke="${CC.b}" stroke-width="6.5" stroke-linecap="round" style="animation:legRun .22s ease-in-out infinite reverse alternate;transform-origin:55px 70px"/>`,
+      <path d="M69 55 Q80 46 76 36 Q72 27 78 23" stroke="${CC.s}" stroke-width="4.5" fill="none" stroke-linecap="round" style="animation:tailWag .18s ease-in-out infinite alternate;transform-origin:69px 55px"/>
+      <line x1="36" y1="70" x2="29" y2="84" stroke="${CC.b}" stroke-width="6.5" stroke-linecap="round" style="animation:legRun .18s ease-in-out infinite alternate;transform-origin:36px 70px"/>
+      <line x1="55" y1="70" x2="63" y2="84" stroke="${CC.b}" stroke-width="6.5" stroke-linecap="round" style="animation:legRun .18s ease-in-out infinite reverse alternate;transform-origin:55px 70px"/>
+      <line x1="30" y1="68" x2="22" y2="79" stroke="${CC.b}" stroke-width="5" stroke-linecap="round" style="animation:legRun .18s ease-in-out infinite alternate .09s;transform-origin:30px 68px"/>
+      <line x1="59" y1="68" x2="67" y2="79" stroke="${CC.b}" stroke-width="5" stroke-linecap="round" style="animation:legRun .18s ease-in-out infinite reverse alternate .09s;transform-origin:59px 68px"/>`,
     crash:`
-      <g transform="rotate(16 46 58)">
+      <g transform="rotate(20 46 58)">
         <ellipse cx="46" cy="58" rx="25" ry="20" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
         <ellipse cx="46" cy="63" rx="17" ry="12" fill="${CC.bel}"/>
       </g>
       <circle cx="42" cy="28" r="19" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
       <polygon points="26,15 20,5 33,14" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
       <polygon points="58,15 64,5 51,14" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
-      <text x="28" y="33" font-size="11" fill="${CC.e}" font-weight="900">x</text>
-      <text x="44" y="33" font-size="11" fill="${CC.e}" font-weight="900">x</text>
+      <text x="25" y="33" font-size="12" fill="${CC.e}" font-weight="900">x</text>
+      <text x="42" y="33" font-size="12" fill="${CC.e}" font-weight="900">x</text>
       <ellipse cx="29" cy="36" rx="5" ry="2.7" fill="${CC.ck}" opacity=".6"/>
       <ellipse cx="55" cy="36" rx="5" ry="2.7" fill="${CC.ck}" opacity=".6"/>
-      <ellipse cx="42" cy="36" rx="2.5" ry="1.8" fill="${CC.n}"/>
-      <ellipse cx="42" cy="42" rx="4" ry="3" fill="${CC.n}" style="animation:pantT .35s ease-in-out infinite alternate"/>
-      <line x1="35" y1="72" x2="24" y2="83" stroke="${CC.b}" stroke-width="6.5" stroke-linecap="round"/>
-      <line x1="57" y1="72" x2="68" y2="83" stroke="${CC.b}" stroke-width="6.5" stroke-linecap="round"/>`,
+      <ellipse cx="42" cy="37" rx="2.5" ry="1.8" fill="${CC.n}"/>
+      <path d="M35 43 Q42 50 49 43" stroke="${CC.n}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <text x="60" y="20" font-size="18" fill="#f5c842">💫</text>
+      <text x="10" y="22" font-size="14" fill="#f9a8c9">⭐</text>`,
     pant:`
       <ellipse cx="46" cy="56" rx="25" ry="20" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4" style="animation:bodyB .5s ease-in-out infinite alternate"/>
       <ellipse cx="46" cy="62" rx="17" ry="12" fill="${CC.bel}" style="animation:pantT .45s ease-in-out infinite alternate"/>
@@ -425,20 +697,21 @@ function catSVG(pose,sz=82){
       <ellipse cx="59" cy="76" rx="9" ry="6.5" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.1"/>
       <path d="M68 61 Q78 69 72 78" stroke="${CC.s}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`,
     confused:`
-      <g style="animation:confused 1s ease-in-out infinite;transform-origin:46px 55px">
+      <g style="animation:confused 0.8s ease-in-out infinite;transform-origin:46px 55px">
         <ellipse cx="46" cy="57" rx="25" ry="20" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
         <ellipse cx="46" cy="62" rx="17" ry="12" fill="${CC.bel}"/>
         <circle cx="49" cy="27" r="19" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4" transform="rotate(10 49 27)"/>
         <polygon points="32,13 26,3 39,12" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
         <polygon points="65,17 71,29 56,15" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
-        <text x="33" y="32" font-size="11" fill="${CC.e}" font-weight="900">?</text>
-        <circle cx="55" cy="27" r="3.4" fill="${CC.e}"/><circle cx="56" cy="26" r="1.3" fill="#fff"/>
+        <text x="33" y="32" font-size="12" fill="${CC.e}" font-weight="900">?</text>
+        <text x="48" y="32" font-size="12" fill="${CC.e}" font-weight="900">?</text>
         <ellipse cx="35" cy="34" rx="4.5" ry="2.5" fill="${CC.ck}" opacity=".5"/>
         <ellipse cx="61" cy="34" rx="4.5" ry="2.5" fill="${CC.ck}" opacity=".5"/>
         <ellipse cx="48" cy="34" rx="2.5" ry="1.8" fill="${CC.n}"/>
         <ellipse cx="33" cy="76" rx="9" ry="6.5" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.1"/>
         <ellipse cx="59" cy="76" rx="9" ry="6.5" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.1"/>
-      </g>`,
+      </g>
+      <text x="70" y="18" font-size="16" style="animation:zUp 1.2s ease-in-out infinite">🔍</text>`,
     dance:`
       <g style="animation:dance .48s ease-in-out infinite;transform-origin:46px 55px">
         <ellipse cx="46" cy="57" rx="25" ry="20" fill="${CC.b}" stroke="${CC.o}" stroke-width="1.4"/>
@@ -487,7 +760,9 @@ function catSVG(pose,sz=82){
   return `<svg width="${sz}" height="${sz}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" overflow="visible">${p[pose]||''}</svg>`;
 }
 
-/* ── PETALS ── */
+/* ══════════════════════════════════════
+   PETALS
+══════════════════════════════════════ */
 (function(){
   const c=document.getElementById('petals');
   const items=['✿','❀','·','˚','✦'],cols=['#f9a8c9','#fde8d8','#fce4ec','#f5c842','#fda4af'];
@@ -499,10 +774,12 @@ function catSVG(pose,sz=82){
   }
 })();
 
-/* ── SMOOTH PAGE TRANSITION ── */
+/* ══════════════════════════════════════
+   PAGE TRANSITION
+══════════════════════════════════════ */
 let busy=false;
-function goTo(id,delay=0){
-  if(busy)return;busy=true;
+function goTo(id, delay=0){
+  if(busy)return; busy=true;
   const cur=document.querySelector('.page.active');
   const go=()=>{
     const next=document.getElementById(id);
@@ -520,9 +797,12 @@ function goTo(id,delay=0){
   };
   delay>0?setTimeout(go,delay):go();
 }
+function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 
-/* ── ROUTING ── */
-let gData=null,cdTotal=5;
+/* ══════════════════════════════════════
+   ROUTING & DATA
+══════════════════════════════════════ */
+let gData=null, cdTotal=5;
 window.addEventListener('DOMContentLoaded',()=>{
   const hash=location.hash.slice(1);
   if(hash){
@@ -546,134 +826,255 @@ function applyData(){
   cdTotal=parseInt(d.cd||5);
   if(d.music){document.getElementById('aud').src=d.music;if(d.musicName)set('aud-title',d.musicName);}
   // init cats
-  document.getElementById('cd-cat').innerHTML=catSVG('run',80);
   document.getElementById('pant-cat').innerHTML=catSVG('pant',80);
   document.getElementById('dance-cat').innerHTML=catSVG('dance',78);
   document.getElementById('sleep-cat').innerHTML=catSVG('sleep',94);
 }
-function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 
-/* ── COUNTDOWN ── */
-const cdTexts=['Hei! Ayo kejar aku!','Lari lari lari!!','Hampir sampai nih...','Siap-siap ya!','YEAY!!'];
+/* ══════════════════════════════════════
+   COUNTDOWN - kucing lari TERUS sampai selesai, lalu tombol muncul
+══════════════════════════════════════ */
+const cdTexts=[
+  'Hei! Ayo kejar aku! 🏃',
+  'Lari lari lari!! 💨',
+  'Hampir sampai nih...',
+  'Siap-siap ya! 🎁',
+  'YEAY!! 🎉'
+];
+
+// Kucing lari terus di track countdown (animasi loop tiap 1.8 detik)
+let cdRunnerInterval = null;
+function startCdRunner(){
+  const runner = document.getElementById('cd-runner');
+  runner.innerHTML = catSVG('run', 72);
+
+  // inject keyframe sekali
+  if(!document.getElementById('kfCdRun')){
+    const st=document.createElement('style');st.id='kfCdRun';
+    st.textContent=`@keyframes cdRunLoop{0%{left:-90px}100%{left:calc(100% + 10px)}}`;
+    document.head.appendChild(st);
+  }
+
+  let meowInterval = null;
+  function launchRunner(){
+    runner.style.animation='none';
+    runner.style.left='-90px';
+    void runner.offsetWidth;
+    runner.style.cssText='position:absolute;bottom:2px;left:-90px;animation:cdRunLoop 1.8s linear forwards';
+  }
+
+  launchRunner();
+  // meow tiap lari
+  setTimeout(()=>soundMeow(), 200);
+
+  cdRunnerInterval = setInterval(()=>{
+    launchRunner();
+    // Tiap 2 putaran meow
+    if(Math.random()>.5) soundMeow();
+  }, 1850);
+
+  meowInterval = cdRunnerInterval; // store for cleanup
+}
+
+function stopCdRunner(){
+  if(cdRunnerInterval){ clearInterval(cdRunnerInterval); cdRunnerInterval=null; }
+}
+
 function startCD(){
+  startCdRunner();
   let n=cdTotal;
-  const numEl=document.getElementById('cd-num'),ring=document.getElementById('ring'),bub=document.getElementById('cd-bub');
-  const circ=390;numEl.textContent=n;ring.style.strokeDashoffset=0;
+  const numEl=document.getElementById('cd-num'), ring=document.getElementById('ring'), bub=document.getElementById('cd-bub');
+  const circ=390;
+  numEl.textContent=n;
+  ring.style.strokeDashoffset=0;
+
   const tick=()=>{
     const idx=cdTotal-n;
     ring.style.strokeDashoffset=circ*(idx/cdTotal);
-    if(bub&&cdTexts[idx]){bub.textContent=cdTexts[idx];bub.style.animation='none';bub.offsetHeight;bub.style.animation='bPop .4s ease both';}
-    if(n<=0){setTimeout(()=>startGiftPage(),500);return;}
-    n--;numEl.textContent=n===0?'!':n;
+    if(bub&&cdTexts[idx]){
+      bub.textContent=cdTexts[Math.min(idx,cdTexts.length-1)];
+      bub.style.animation='none'; bub.offsetHeight;
+      bub.style.animation='bPop .4s ease both';
+    }
+    numEl.classList.remove('pop'); void numEl.offsetWidth; numEl.classList.add('pop');
+
+    if(n<=0){
+      // Countdown selesai - stop runner, tampilkan tombol
+      setTimeout(()=>{
+        stopCdRunner();
+        // Kucing diam di tengah, purr
+        const runner=document.getElementById('cd-runner');
+        runner.style.cssText='position:absolute;bottom:2px;left:50%;transform:translateX(-50%)';
+        runner.innerHTML=catSVG('dance',72);
+        soundHappy();
+        if(bub){ bub.textContent='Udah siap? Ayo lanjut! 🎉'; bub.style.animation='none'; bub.offsetHeight; bub.style.animation='bPop .5s cubic-bezier(.34,1.56,.64,1) both'; }
+        document.getElementById('cd-next').classList.add('show');
+        confetti(25);
+      }, 400);
+      return;
+    }
+    n--;
+    numEl.textContent=n===0?'!':n;
     setTimeout(tick,1000);
   };
   setTimeout(tick,900);
 }
 
-/* ── GIFT PAGE: run → crash → bintang → giftbox ── */
+/* ══════════════════════════════════════
+   GIFT PAGE - kucing lari, nabrak, tombol next
+══════════════════════════════════════ */
 function startGiftPage(){
   goTo('pg-gift');
   setTimeout(()=>{
-    // 1. inject run keyframe once
     if(!document.getElementById('kfRun')){
       const st=document.createElement('style');st.id='kfRun';
-      st.textContent='@keyframes catAcross{0%{left:-90px}68%{left:calc(100% - 86px)}72%{left:calc(100% - 66px)}76%{left:calc(100% - 56px)}100%{left:calc(100% - 86px)}}';
+      st.textContent='@keyframes catAcross{0%{left:-90px}68%{left:calc(100% - 90px)}72%{left:calc(100% - 70px)}76%{left:calc(100% - 58px)}100%{left:calc(100% - 88px)}}';
       document.head.appendChild(st);
     }
     const runner=document.getElementById('cat-run-el');
     runner.innerHTML=catSVG('run',76);
-    runner.style.cssText='position:absolute;bottom:2px;left:-90px;animation:catAcross 2.5s ease forwards';
+    runner.style.cssText='position:absolute;bottom:2px;left:-90px;animation:catAcross 2.2s ease forwards';
+    soundMeow();
 
-    // 2. After 2.5s → crash
+    // 2.2s → crash!
     setTimeout(()=>{
+      soundCrash();
       runner.innerHTML=catSVG('crash',76);
       document.getElementById('stars-el').classList.add('on');
 
-      // 3. After 1s → hide run phase, show gift
+      // 1.5s setelah crash → tampilkan scene crash dengan bubble dan tombol
       setTimeout(()=>{
         document.getElementById('stars-el').classList.remove('on');
-        document.getElementById('run-phase').style.opacity='0';
-        document.getElementById('run-phase').style.transition='opacity .4s';
-
-        setTimeout(()=>{
-          document.getElementById('run-phase').style.display='none';
-          document.getElementById('gift-cat').innerHTML=catSVG('pant',74);
-          document.getElementById('gift-phase').style.display='block';
-          set('gift-ttl','Buka kadonya!');
-        },420);
-      },1100);
-    },2550);
-  },600);
+        document.getElementById('crash-scene').style.display='block';
+        document.getElementById('crash-cat').innerHTML=catSVG('crash',68);
+        document.getElementById('crash-next-btn').style.display='block';
+        document.getElementById('crash-next').classList.add('show');
+        soundHiss();
+      }, 1400);
+    }, 2250);
+  }, 600);
 }
 
-/* ── GIFT TAP ── */
+// Tombol "Eh ada apa tuh?" setelah crash
+function showGiftBox(){
+  document.getElementById('run-phase').style.opacity='0';
+  document.getElementById('run-phase').style.transition='opacity .4s';
+  document.getElementById('crash-next').classList.remove('show');
+  setTimeout(()=>{
+    document.getElementById('run-phase').style.display='none';
+    document.getElementById('crash-next').style.display='none';
+    document.getElementById('gift-cat').innerHTML=catSVG('pant',74);
+    document.getElementById('gift-phase').classList.add('show');
+    set('gift-ttl','Buka kadonya! 🎁');
+    soundPurr();
+    // reset taps
+    taps=0;
+    ['tdot0','tdot1','tdot2'].forEach(id=>document.getElementById(id).classList.remove('done'));
+  },420);
+}
+
+/* ══════════════════════════════════════
+   GIFT TAP
+══════════════════════════════════════ */
 let taps=0;
-const tapTexts=['Tap kado untuk membuka','Tap lagi dong...','Satu lagi!'];
-const bubTexts=['Nih kadonya, tap deh!','Eh tap beneran...','Iya tap ini!'];
+const tapTexts=['Tap lagi dong... 👀','Satu lagi! 😏',''];
+const bubTexts=['Nih kadonya, tap deh!','Eh tap beneran...','Iya TAP INI! 😤'];
 function tapGift(){
   if(busy)return;
   const box=document.getElementById('giftbox'),hint=document.getElementById('tap-hint'),bub=document.getElementById('gift-bub');
-  taps++;confetti(taps===1?7:taps===2?15:38);
+  taps++;
+  confetti(taps===1?7:taps===2?15:38);
+
+  if(taps<=3) document.getElementById('tdot'+(taps-1)).classList.add('done');
+
   if(taps<3){
-    box.classList.remove('shk');void box.offsetWidth;box.classList.add('shk');
-    hint.textContent=tapTexts[taps]||'';
+    box.classList.remove('shk'); void box.offsetWidth; box.classList.add('shk');
+    hint.textContent=tapTexts[taps-1]||'';
     if(bub){bub.textContent=bubTexts[taps]||'';bub.style.animation='none';bub.offsetHeight;bub.style.animation='bPop .4s ease both';}
-  }else{
-    box.classList.remove('shk');box.classList.add('exp');
-    setTimeout(startTwist,440);
+    soundMeow();
+  } else {
+    box.classList.remove('shk'); box.classList.add('exp');
+    soundSurprise();
+    setTimeout(startTwist1, 440);
   }
 }
 
-/* ── PLOT TWIST ── */
-const twists=[
-  {b:'Eh... kosong??',h:'Lho kok kosong?!',s:'Tunggu... kayaknya ada yang ketinggalan'},
-  {b:'Waduh waduh waduh...',h:'Jangan panik dulu!',s:'Bentar bentar bentar...'},
-  {b:'Oh!! Ini dia ternyata!',h:'Nemu!!',s:'Ini yang sebenernya buat kamu'},
-];
-function startTwist(){
-  document.getElementById('empty-cat').innerHTML=catSVG('confused',86);
-  goTo('pg-empty');
-  let i=0;applyTwist(0);
-  const iv=setInterval(()=>{
-    i++;
-    if(i<twists.length)applyTwist(i);
-    else{clearInterval(iv);setTimeout(()=>goTo('pg-letter'),1000);}
-  },1600);
-}
-function applyTwist(i){
-  const t=twists[i],bub=document.getElementById('empty-bub');
-  if(bub){bub.textContent=t.b;bub.style.animation='none';bub.offsetHeight;bub.style.animation='bPop .4s ease both';}
-  set('empty-h',t.h);set('empty-sub',t.s);
+/* ══════════════════════════════════════
+   PLOT TWIST - 3 halaman terpisah dengan tombol next
+══════════════════════════════════════ */
+function startTwist1(){
+  goTo('pg-twist1');
+  setTimeout(()=>{
+    document.getElementById('twist1-cat').innerHTML=catSVG('confused',86);
+    soundHiss(); // kaget
+    // Tampilkan tombol setelah 2.5 detik biar bisa dibaca
+    setTimeout(()=>{
+      document.getElementById('tw1-next').style.display='flex';
+      document.getElementById('tw1-next').classList.add('show');
+    }, 2500);
+  }, 400);
 }
 
-/* ── ENVELOPE ── */
+function goTwist2(){
+  goTo('pg-twist2');
+  setTimeout(()=>{
+    document.getElementById('twist2-cat').innerHTML=catSVG('pant',86);
+    soundHiss();
+    // Tampilkan tombol setelah 3 detik
+    setTimeout(()=>{
+      document.getElementById('tw2-next').style.display='flex';
+      document.getElementById('tw2-next').classList.add('show');
+    }, 3000);
+  }, 400);
+}
+
+function goTwist3(){
+  goTo('pg-twist3');
+  setTimeout(()=>{
+    document.getElementById('twist3-cat').innerHTML=catSVG('dance',86);
+    soundHappy();
+    confetti(40);
+    // Tampilkan tombol setelah 2 detik
+    setTimeout(()=>{
+      document.getElementById('tw3-next').style.display='flex';
+      document.getElementById('tw3-next').classList.add('show');
+    }, 2000);
+  }, 400);
+}
+
+/* ══════════════════════════════════════
+   ENVELOPE
+══════════════════════════════════════ */
 let envOpen=false;
 function openEnv(){
-  if(envOpen||busy)return;envOpen=true;
+  if(envOpen||busy)return; envOpen=true;
   document.getElementById('env').classList.add('env-open');
   document.getElementById('env-hint').textContent='';
+  soundMeow();
   setTimeout(()=>document.getElementById('lcard').classList.add('show'),640);
 }
 
-/* ── GALLERY ── */
-let slideIdx=0,totalSlides=0;
+/* ══════════════════════════════════════
+   GALLERY
+══════════════════════════════════════ */
+let slideIdx=0, totalSlides=0;
 function goGallery(){buildSlides();goTo('pg-gallery');}
 function buildSlides(){
-  const photos=(gData&&gData.photos)||[],caps=(gData&&gData.caps)||[];
-  const slidesEl=document.getElementById('slides'),dotsEl=document.getElementById('dots');
-  slidesEl.innerHTML='';dotsEl.innerHTML='';
+  const photos=(gData&&gData.photos)||[], caps=(gData&&gData.caps)||[];
+  const slidesEl=document.getElementById('slides'), dotsEl=document.getElementById('dots');
+  slidesEl.innerHTML=''; dotsEl.innerHTML='';
   totalSlides=photos.length||3;
   for(let i=0;i<totalSlides;i++){
-    const sl=document.createElement('div');sl.className='slide'+(i===0?' active':'');sl.id='sl'+i;
-    const fr=document.createElement('div');fr.className='photo-frame';
+    const sl=document.createElement('div'); sl.className='slide'+(i===0?' active':''); sl.id='sl'+i;
+    const fr=document.createElement('div'); fr.className='photo-frame';
     if(photos[i]){const img=document.createElement('img');img.src=photos[i];fr.appendChild(img);}
     else{const ph=document.createElement('div');ph.className='photo-ph';ph.innerHTML=catSVG('dance',56)+'<p>Upload foto di admin</p>';fr.appendChild(ph);}
     const badge=document.createElement('div');badge.className='photo-badge';badge.textContent=`${i+1} / ${totalSlides}`;fr.appendChild(badge);
     const cap=document.createElement('div');cap.className='photo-cap';cap.textContent=caps[i]||`Momen ke-${i+1}`;
-    sl.appendChild(fr);sl.appendChild(cap);slidesEl.appendChild(sl);
+    sl.appendChild(fr); sl.appendChild(cap); slidesEl.appendChild(sl);
     const dot=document.createElement('div');dot.className='dot'+(i===0?' on':'');dot.id='d'+i;dotsEl.appendChild(dot);
   }
-  slideIdx=0;updateNav();
+  slideIdx=0; updateNav();
 }
 function updateNav(){
   document.getElementById('btn-p').disabled=slideIdx===0;
@@ -681,11 +1082,28 @@ function updateNav(){
   document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===slideIdx));
   if(slideIdx===totalSlides-1)document.getElementById('finish-btn').style.display='block';
 }
-function prevSlide(){if(slideIdx<=0||busy)return;document.getElementById('sl'+slideIdx).classList.remove('active');slideIdx--;const s=document.getElementById('sl'+slideIdx);s.classList.add('active');s.style.animation='none';s.offsetHeight;s.style.animation='';updateNav();}
-function nextSlide(){if(slideIdx>=totalSlides-1||busy)return;document.getElementById('sl'+slideIdx).classList.remove('active');slideIdx++;const s=document.getElementById('sl'+slideIdx);s.classList.add('active');s.style.animation='none';s.offsetHeight;s.style.animation='';updateNav();}
-function goFinal(){confetti(80);goTo('pg-final');}
+function prevSlide(){
+  if(slideIdx<=0||busy)return;
+  document.getElementById('sl'+slideIdx).classList.remove('active');
+  slideIdx--;
+  const s=document.getElementById('sl'+slideIdx);s.classList.add('active');
+  s.style.animation='none';s.offsetHeight;s.style.animation='';
+  updateNav();
+}
+function nextSlide(){
+  if(slideIdx>=totalSlides-1||busy)return;
+  document.getElementById('sl'+slideIdx).classList.remove('active');
+  slideIdx++;
+  const s=document.getElementById('sl'+slideIdx);s.classList.add('active');
+  s.style.animation='none';s.offsetHeight;s.style.animation='';
+  soundPurr();
+  updateNav();
+}
+function goFinal(){confetti(80);soundHappy();goTo('pg-final');}
 
-/* ── AUDIO ── */
+/* ══════════════════════════════════════
+   AUDIO
+══════════════════════════════════════ */
 let playing=false;
 function toggleAudio(){
   const a=document.getElementById('aud');
@@ -694,11 +1112,24 @@ function toggleAudio(){
   else{a.play().catch(()=>{});playing=true;document.getElementById('play-b').textContent='⏸';document.getElementById('eq').classList.remove('off');}
 }
 
-/* ── CONFETTI ── */
+/* ══════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════ */
 const COLS=['#f9a8c9','#f5c842','#c084fc','#60a5fa','#86efac','#fb923c'];
-function confetti(n){for(let i=0;i<n;i++){setTimeout(()=>{const el=document.createElement('div');el.className='cf';el.style.cssText=`left:${Math.random()*100}vw;width:${6+Math.random()*9}px;height:${6+Math.random()*9}px;border-radius:${Math.random()>.4?'50%':'2px'};background:${COLS[Math.floor(Math.random()*COLS.length)]};animation-duration:${2+Math.random()*2.3}s;animation-delay:${Math.random()*.35}s`;document.body.appendChild(el);setTimeout(()=>el.remove(),4000);},i*20);}}
+function confetti(n){
+  for(let i=0;i<n;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');el.className='cf';
+      el.style.cssText=`left:${Math.random()*100}vw;width:${6+Math.random()*9}px;height:${6+Math.random()*9}px;border-radius:${Math.random()>.4?'50%':'2px'};background:${COLS[Math.floor(Math.random()*COLS.length)]};animation-duration:${2+Math.random()*2.3}s;animation-delay:${Math.random()*.35}s`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),4000);
+    },i*20);
+  }
+}
 
-/* ── ADMIN ── */
+/* ══════════════════════════════════════
+   ADMIN
+══════════════════════════════════════ */
 function onPhotosChange(input){
   const files=Array.from(input.files).slice(0,5),wrap=document.getElementById('cap-wrap'),list=document.getElementById('cap-list');
   list.innerHTML='';if(!files.length){wrap.style.display='none';return;}wrap.style.display='block';
