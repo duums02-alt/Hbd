@@ -630,6 +630,20 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
     </div>
   </div>
 
+  <!-- JSONBin -->
+  <div class="adm-card">
+    <div class="adm-card-title">JSONBin API Key <span style="font-size:.6rem;color:#6b4055;font-weight:400;text-transform:none;letter-spacing:0">(untuk link pendek)</span></div>
+    <div class="field">
+      <label>Master Key <span style="color:#6b4055;font-weight:400">(gratis di jsonbin.io)</span></label>
+      <div class="key-row">
+        <input id="jsonbin-key" type="password" placeholder="Paste $2b$... master key...">
+        <button class="key-test-btn" onclick="testJsonBin()">Test</button>
+      </div>
+      <div id="jb-status" class="key-status"></div>
+      <small>Daftar gratis → jsonbin.io → API Keys → Master Key</small>
+    </div>
+  </div>
+
   <!-- Photos -->
   <div class="adm-card">
     <div class="adm-card-title">Foto & GIF (maks 30)</div>
@@ -826,15 +840,32 @@ const ANIM_PARTICLES = {
 /* ══════════════════════════════════════
    ROUTING
 ══════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const hash = location.hash.slice(1);
   if (hash) {
-    try {
-      gData = JSON.parse(decodeURIComponent(atob(hash)));
+    if (hash.startsWith('jb:')) {
+      // JSONBin mode — short link
+      const binId = hash.slice(3);
       showScreen('s-machine');
-      populateMachine(gData);
-    } catch(e) {
-      showScreen('s-admin');
+      // show loading state on machine screen
+      document.getElementById('machine-text').textContent = 'Memuat album...';
+      document.getElementById('machine-sub').textContent = 'Sabar ya ✨';
+      try {
+        gData = await loadFromJsonBin(binId);
+        populateMachine(gData);
+      } catch(e) {
+        document.getElementById('machine-text').textContent = 'Gagal memuat :(';
+        document.getElementById('machine-sub').textContent = 'Coba minta link baru';
+      }
+    } else {
+      // Legacy base64 mode
+      try {
+        gData = JSON.parse(decodeURIComponent(atob(hash)));
+        showScreen('s-machine');
+        populateMachine(gData);
+      } catch(e) {
+        showScreen('s-admin');
+      }
     }
   } else {
     showScreen('s-admin');
@@ -1176,15 +1207,66 @@ function getBubbleData() {
 }
 
 /* ══════════════════════════════════════
+   JSONBIN
+══════════════════════════════════════ */
+async function testJsonBin() {
+  const key = document.getElementById('jsonbin-key').value.trim();
+  const st  = document.getElementById('jb-status');
+  if (!key) { st.textContent = '⚠ Masukkan key dulu'; st.className = 'key-status err'; return; }
+  st.textContent = 'Mengecek...'; st.className = 'key-status';
+  try {
+    const res = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'X-Master-Key': key, 'X-Bin-Private':'true', 'X-Bin-Name':'test' },
+      body: JSON.stringify({ test: true })
+    });
+    const data = await res.json();
+    if (data.metadata?.id) {
+      st.textContent = '✓ Key valid! ID: ' + data.metadata.id; st.className = 'key-status ok';
+      // cleanup test bin
+      fetch(`https://api.jsonbin.io/v3/b/${data.metadata.id}`, { method:'DELETE', headers:{'X-Master-Key':key} });
+    } else {
+      st.textContent = '✗ Key tidak valid'; st.className = 'key-status err';
+    }
+  } catch(e) { st.textContent = '✗ Gagal konek'; st.className = 'key-status err'; }
+}
+
+async function saveToJsonBin(payload) {
+  const key = document.getElementById('jsonbin-key').value.trim();
+  if (!key) throw new Error('JSONBin key kosong');
+  const res = await fetch('https://api.jsonbin.io/v3/b', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'X-Master-Key': key, 'X-Bin-Private':'false', 'X-Bin-Name':'birthday-album' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!data.metadata?.id) throw new Error('Gagal simpan ke JSONBin');
+  return data.metadata.id;
+}
+
+async function loadFromJsonBin(binId) {
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    headers: { 'X-Bin-Meta': 'false' }
+  });
+  if (!res.ok) throw new Error('Data tidak ditemukan');
+  return await res.json();
+}
+
+/* ══════════════════════════════════════
    GENERATE
 ══════════════════════════════════════ */
-function generate() {
+async function generate() {
+  const jbKey = document.getElementById('jsonbin-key').value.trim();
+  if (!jbKey) { alert('Masukkan JSONBin API key dulu!\n\nDaftar gratis di jsonbin.io → API Keys → Master Key'); return; }
+
+  const btn = document.querySelector('.gen-btn');
+  btn.textContent = '⏳ Menyimpan...'; btn.disabled = true;
+
   const name = document.getElementById('a-name').value || 'Sayang';
   const sub  = document.getElementById('a-sub').value || '';
   const end  = document.getElementById('a-end').value || '';
   const bubblesData = getBubbleData();
 
-  // Build items array
   const items = [];
   bubblesData.forEach(b => items.push({ type:'bubble', side:b.side, text:b.text }));
   if (bubblesData.length && photos.length) items.push({ type:'sep', text:'✦ foto ✦' });
@@ -1194,13 +1276,18 @@ function generate() {
   }));
 
   const payload = { name, sub, end, items, music: musicData };
+
   try {
-    const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
-    const link = location.href.split('#')[0] + '#' + encoded;
+    const binId = await saveToJsonBin(payload);
+    const link = location.href.split('#')[0] + '#jb:' + binId;
     document.getElementById('result-link').textContent = link;
     document.getElementById('result-box').classList.add('on');
     setTimeout(() => document.getElementById('result-box').scrollIntoView({ behavior:'smooth' }), 100);
-  } catch(e) { alert('Gagal generate. Coba lagi.'); }
+  } catch(e) {
+    alert('Gagal generate: ' + e.message);
+  }
+
+  btn.textContent = '🎉 Generate Link Album'; btn.disabled = false;
 }
 
 function copyLink() {
