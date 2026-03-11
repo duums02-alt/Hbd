@@ -630,18 +630,13 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
     </div>
   </div>
 
-  <!-- JSONBin -->
+  <!-- jsonblob info -->
   <div class="adm-card">
-    <div class="adm-card-title">JSONBin API Key <span style="font-size:.6rem;color:#6b4055;font-weight:400;text-transform:none;letter-spacing:0">(untuk link pendek)</span></div>
-    <div class="field">
-      <label>Master Key <span style="color:#6b4055;font-weight:400">(gratis di jsonbin.io)</span></label>
-      <div class="key-row">
-        <input id="jsonbin-key" type="password" placeholder="Paste $2b$... master key...">
-        <button class="key-test-btn" onclick="testJsonBin()">Test</button>
-      </div>
-      <div id="jb-status" class="key-status"></div>
-      <small>Daftar gratis → jsonbin.io → API Keys → Master Key</small>
+    <div class="adm-card-title">💾 Penyimpanan Data <span style="font-size:.6rem;color:#6b4055;font-weight:400;text-transform:none;letter-spacing:0">(link pendek, no login)</span></div>
+    <div style="font-size:.72rem;color:#d4a0b0;line-height:1.65;padding:2px 0 6px">
+      Pakai <strong style="color:var(--pk)">jsonblob.com</strong> — gratis, tanpa daftar, tanpa API key. Data disimpan otomatis saat generate 🎉
     </div>
+    <div id="jb-status" class="key-status"></div>
   </div>
 
   <!-- Photos -->
@@ -843,15 +838,14 @@ const ANIM_PARTICLES = {
 window.addEventListener('DOMContentLoaded', async () => {
   const hash = location.hash.slice(1);
   if (hash) {
-    if (hash.startsWith('jb:')) {
-      // JSONBin mode — short link
-      const binId = hash.slice(3);
+    if (hash.startsWith('np:') || hash.startsWith('jb:')) {
+      // npoint or legacy jsonbin — short link
+      const npId = hash.slice(3);
       showScreen('s-machine');
-      // show loading state on machine screen
       document.getElementById('machine-text').textContent = 'Memuat album...';
       document.getElementById('machine-sub').textContent = 'Sabar ya ✨';
       try {
-        gData = await loadFromJsonBin(binId);
+        gData = await loadFromNpoint(npId);
         populateMachine(gData);
       } catch(e) {
         document.getElementById('machine-text').textContent = 'Gagal memuat :(';
@@ -1207,46 +1201,25 @@ function getBubbleData() {
 }
 
 /* ══════════════════════════════════════
-   JSONBIN
+   JSONBLOB STORAGE (no login, no CORS)
 ══════════════════════════════════════ */
-async function testJsonBin() {
-  const key = document.getElementById('jsonbin-key').value.trim();
-  const st  = document.getElementById('jb-status');
-  if (!key) { st.textContent = '⚠ Masukkan key dulu'; st.className = 'key-status err'; return; }
-  st.textContent = 'Mengecek...'; st.className = 'key-status';
-  try {
-    const res = await fetch('https://api.jsonbin.io/v3/b', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'X-Master-Key': key, 'X-Bin-Private':'true', 'X-Bin-Name':'test' },
-      body: JSON.stringify({ test: true })
-    });
-    const data = await res.json();
-    if (data.metadata?.id) {
-      st.textContent = '✓ Key valid! ID: ' + data.metadata.id; st.className = 'key-status ok';
-      // cleanup test bin
-      fetch(`https://api.jsonbin.io/v3/b/${data.metadata.id}`, { method:'DELETE', headers:{'X-Master-Key':key} });
-    } else {
-      st.textContent = '✗ Key tidak valid'; st.className = 'key-status err';
-    }
-  } catch(e) { st.textContent = '✗ Gagal konek'; st.className = 'key-status err'; }
-}
-
-async function saveToJsonBin(payload) {
-  const key = document.getElementById('jsonbin-key').value.trim();
-  if (!key) throw new Error('JSONBin key kosong');
-  const res = await fetch('https://api.jsonbin.io/v3/b', {
+async function saveToNpoint(payload) {
+  const res = await fetch('https://jsonblob.com/api/jsonBlob', {
     method: 'POST',
-    headers: { 'Content-Type':'application/json', 'X-Master-Key': key, 'X-Bin-Private':'false', 'X-Bin-Name':'birthday-album' },
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify(payload)
   });
-  const data = await res.json();
-  if (!data.metadata?.id) throw new Error('Gagal simpan ke JSONBin');
-  return data.metadata.id;
+  if (!res.ok) throw new Error('Gagal simpan (' + res.status + ')');
+  // jsonblob returns the ID in the Location header: /api/jsonBlob/<id>
+  const location = res.headers.get('Location') || '';
+  const id = location.split('/').pop();
+  if (!id) throw new Error('ID tidak ditemukan di respons');
+  return id;
 }
 
-async function loadFromJsonBin(binId) {
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-    headers: { 'X-Bin-Meta': 'false' }
+async function loadFromNpoint(blobId) {
+  const res = await fetch('https://jsonblob.com/api/jsonBlob/' + blobId, {
+    headers: { 'Accept': 'application/json' }
   });
   if (!res.ok) throw new Error('Data tidak ditemukan');
   return await res.json();
@@ -1256,11 +1229,11 @@ async function loadFromJsonBin(binId) {
    GENERATE
 ══════════════════════════════════════ */
 async function generate() {
-  const jbKey = document.getElementById('jsonbin-key').value.trim();
-  if (!jbKey) { alert('Masukkan JSONBin API key dulu!\n\nDaftar gratis di jsonbin.io → API Keys → Master Key'); return; }
-
   const btn = document.querySelector('.gen-btn');
   btn.textContent = '⏳ Menyimpan...'; btn.disabled = true;
+
+  const st = document.getElementById('jb-status');
+  st.textContent = ''; st.className = 'key-status';
 
   const name = document.getElementById('a-name').value || 'Sayang';
   const sub  = document.getElementById('a-sub').value || '';
@@ -1278,12 +1251,15 @@ async function generate() {
   const payload = { name, sub, end, items, music: musicData };
 
   try {
-    const binId = await saveToJsonBin(payload);
-    const link = location.href.split('#')[0] + '#jb:' + binId;
+    st.textContent = 'Menyimpan data...'; st.className = 'key-status';
+    const npId = await saveToNpoint(payload);
+    const link = location.href.split('#')[0] + '#np:' + npId;
     document.getElementById('result-link').textContent = link;
     document.getElementById('result-box').classList.add('on');
+    st.textContent = '✓ Tersimpan!'; st.className = 'key-status ok';
     setTimeout(() => document.getElementById('result-box').scrollIntoView({ behavior:'smooth' }), 100);
   } catch(e) {
+    st.textContent = '✗ ' + e.message; st.className = 'key-status err';
     alert('Gagal generate: ' + e.message);
   }
 
