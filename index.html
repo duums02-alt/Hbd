@@ -539,6 +539,49 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 /* CONFETTI */
 .cf{position:fixed;top:-18px;pointer-events:none;z-index:999;animation:cfFall linear forwards}
 @keyframes cfFall{to{transform:translateY(110vh) rotate(540deg);opacity:0}}
+
+/* ════════════════════════════════
+   GALAXY ORBIT SCREEN
+════════════════════════════════ */
+#s-galaxy {
+  background:#000; position:relative; overflow:hidden;
+  min-height:100vh; justify-content:center; align-items:center;
+}
+#galaxy-canvas {
+  position:absolute; inset:0; width:100%; height:100%; z-index:1;
+}
+@keyframes galaxyHint { 0%,100%{opacity:.3} 50%{opacity:.9} }
+
+/* ════ MUSIC PLAYER BAR ════ */
+#music-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:600;
+  background:rgba(255,240,246,.95);backdrop-filter:blur(16px);
+  border-top:1px solid rgba(232,121,160,.2);
+  padding:10px 16px;display:none;
+  align-items:center;gap:10px;
+  box-shadow:0 -4px 20px rgba(200,80,130,.1);
+}
+#music-bar.on{display:flex;animation:slideBarUp .4s cubic-bezier(.34,1.36,.64,1) both}
+@keyframes slideBarUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mbar-play{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pk2),var(--pk3));
+  border:none;cursor:pointer;color:#fff;font-size:.85rem;
+  box-shadow:0 3px 10px var(--shadow);transition:transform .15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.mbar-play:active{transform:scale(.9)}
+.mbar-info{flex:1;overflow:hidden}
+.mbar-title{font-size:.75rem;font-weight:800;color:var(--pk3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbar-sub{font-size:.62rem;color:var(--muted)}
+.mbar-eq{display:flex;gap:2px;align-items:flex-end;height:14px;flex-shrink:0}
+.mbar-eq span{width:3px;border-radius:2px;background:var(--pk2);animation:eqA .5s ease-in-out infinite alternate}
+.mbar-eq span:nth-child(1){height:8px}
+.mbar-eq span:nth-child(2){height:5px;animation-delay:.1s}
+.mbar-eq span:nth-child(3){height:11px;animation-delay:.22s}
+.mbar-eq span:nth-child(4){height:4px;animation-delay:.33s}
+.mbar-eq.paused span{animation-play-state:paused;height:3px!important}
+@keyframes eqA{from{transform:scaleY(.3)}to{transform:scaleY(1.2)}}
 </style>
 </head>
 <body>
@@ -611,6 +654,32 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
     <button class="add-brow-btn" onclick="addBrow()">+ Tambah Pesan</button>
   </div>
 
+  <!-- Musik -->
+  <div class="adm-card">
+    <div class="adm-card-title">🎵 Musik Latar</div>
+    <div class="dropzone" id="music-dz"
+      ondragover="mdzOver(event)" ondragleave="mdzLeave(event)" ondrop="mdzDrop(event)"
+      style="min-height:80px">
+      <input type="file" id="music-input" accept="audio/*" onchange="onMusicChange(event)">
+      <div class="dz-icon" id="music-dz-icon">🎵</div>
+      <div class="dz-text" id="music-dz-text">Drag & drop file musik (MP3/OGG)<br><span style="font-size:.7rem;opacity:.55">atau tap untuk pilih • upload ke ImgBB</span></div>
+    </div>
+    <div id="music-progress" class="upload-progress" style="display:none">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <span id="music-progress-text">Uploading musik...</span>
+    </div>
+    <div id="music-preview" style="display:none;margin-top:10px">
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.08)">
+        <span style="font-size:1.3rem">🎵</span>
+        <div style="flex:1;min-width:0">
+          <div id="music-filename" style="font-size:.78rem;color:#d4a0b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+          <div style="font-size:.65rem;color:#6b4055;margin-top:2px">Siap diputar di album ✓</div>
+        </div>
+        <button onclick="removeMusic()" style="width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,100,120,.15);color:var(--pk);cursor:pointer;font-size:.9rem;flex-shrink:0">×</button>
+      </div>
+    </div>
+  </div>
+
   <button class="gen-btn" onclick="generate()">🎉 Generate Link Album</button>
   <div class="result-box" id="result-box">
     <div style="font-size:.62rem;color:#9c6070;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px">Link untuk penerima</div>
@@ -669,6 +738,24 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
   </div>
 </div>
 
+<!-- ══════════════ GALAXY ORBIT ══════════════ -->
+<section class="screen" id="s-galaxy">
+  <canvas id="galaxy-canvas"></canvas>
+  <div style="position:absolute;top:28px;left:0;right:0;text-align:center;z-index:10;pointer-events:none">
+    <div id="galaxy-name" style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(1rem,4vw,1.5rem);background:linear-gradient(135deg,#fff 0%,#f9a8c9 50%,#f5c842 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 14px rgba(249,168,201,.7));letter-spacing:.04em"></div>
+    <div style="font-size:.6rem;color:rgba(249,168,201,.4);letter-spacing:.16em;text-transform:uppercase;margin-top:3px">tap foto untuk lihat ✦</div>
+  </div>
+  <div id="galaxy-lightbox" style="display:none;position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px">
+    <img id="galaxy-lb-img" src="" style="max-width:100%;max-height:65vh;border-radius:16px;box-shadow:0 0 40px rgba(249,168,201,.35),0 0 80px rgba(249,168,201,.12);object-fit:contain">
+    <div id="galaxy-lb-cap" style="font-family:'Playfair Display',serif;font-style:italic;font-size:.9rem;color:rgba(249,168,201,.8);text-align:center;max-width:280px;line-height:1.5"></div>
+    <button onclick="closeLightbox()" style="padding:10px 28px;border:1.5px solid rgba(249,168,201,.4);border-radius:100px;background:transparent;color:rgba(249,168,201,.8);font-family:'Nunito';font-size:.82rem;font-weight:700;cursor:pointer">Tutup ×</button>
+  </div>
+  <div style="position:absolute;bottom:28px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:10px;z-index:10">
+    <div style="font-size:.62rem;color:rgba(249,168,201,.3);letter-spacing:.12em;animation:galaxyHint 2s ease-in-out infinite">✦ &nbsp; tap orbit foto untuk preview &nbsp; ✦</div>
+    <button onclick="goToAlbumFromGalaxy()" style="padding:13px 34px;border:none;border-radius:100px;background:linear-gradient(135deg,#e879a0,#c2446e);color:#fff;font-family:'Nunito';font-size:.9rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(200,80,130,.4),0 0 30px rgba(249,168,201,.15)">Lihat Album 🎂</button>
+  </div>
+</section>
+
 <!-- ══════════════ ALBUM ══════════════ -->
 <section class="screen" id="s-album">
   <div class="album-hdr">
@@ -677,6 +764,19 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
   </div>
   <div class="feed" id="feed"></div>
 </section>
+
+<!-- ══════════════ MUSIC BAR ══════════════ -->
+<div id="music-bar">
+  <button class="mbar-play" id="mbar-play-btn" onclick="toggleMusic()">▶</button>
+  <div class="mbar-info">
+    <div class="mbar-title" id="mbar-title">Lagu spesial</div>
+    <div class="mbar-sub">untuk kamu 🎂</div>
+  </div>
+  <div class="mbar-eq paused" id="mbar-eq">
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <audio id="bg-audio" loop></audio>
+</div>
 
 <script>
 /* ══════════════════════════════════════
@@ -702,6 +802,8 @@ let bubbles = [];
 let gData = null;
 let browCount = 0;
 let imgbbKey = '';
+let musicData = null; // {url, name}
+let musicPlaying = false;
 
 const ANIM_OPTIONS = [
   {v:'none',  l:'Tidak ada'},
@@ -802,9 +904,10 @@ function startPrinting() {
   overlay.classList.add('on');
   setTimeout(() => {
     overlay.classList.remove('on');
-    buildAlbum(gData);
-    showScreen('s-album');
-    confetti(30);
+    // Go to galaxy orbit screen first, then album
+    showScreen('s-galaxy');
+    confetti(20);
+    initGalaxy(gData);
   }, 2800);
 }
 
@@ -1090,7 +1193,7 @@ function generate() {
     isGif:p.isGif, num:`${i+1} / ${photos.length}`
   }));
 
-  const payload = { name, sub, end, items };
+  const payload = { name, sub, end, items, music: musicData };
   try {
     const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
     const link = location.href.split('#')[0] + '#' + encoded;
@@ -1116,6 +1219,442 @@ function fallbackCopy(t, ok) {
   ta.focus(); ta.select();
   try { document.execCommand('copy'); ok(); } catch(e) { alert('Salin manual:\n\n' + t); }
   ta.remove();
+}
+
+/* ══════════════════════════════════════
+   MUSIC UPLOAD
+══════════════════════════════════════ */
+function mdzOver(e) { e.preventDefault(); document.getElementById('music-dz').classList.add('drag'); }
+function mdzLeave(e) { document.getElementById('music-dz').classList.remove('drag'); }
+function mdzDrop(e) {
+  e.preventDefault();
+  document.getElementById('music-dz').classList.remove('drag');
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
+  if (files[0]) processMusic(files[0]);
+}
+function onMusicChange(e) {
+  if (e.target.files[0]) processMusic(e.target.files[0]);
+  e.target.value = '';
+}
+
+async function processMusic(file) {
+  const key = document.getElementById('imgbb-key').value.trim();
+  if (!key) { alert('Masukkan ImgBB API key dulu!'); return; }
+
+  const prog = document.getElementById('music-progress');
+  const progText = document.getElementById('music-progress-text');
+  prog.style.display = 'flex';
+  progText.textContent = `Uploading: ${file.name}`;
+
+  try {
+    // ImgBB supports any file as base64
+    const b64 = await fileToBase64(file);
+    const form = new FormData();
+    form.append('image', b64.split(',')[1]);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, { method:'POST', body:form });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error?.message || 'Upload gagal');
+    musicData = { url: data.data.url, name: file.name.replace(/\.[^.]+$/, '') };
+    showMusicPreview();
+  } catch(e) {
+    // fallback: embed as base64 directly (for small files)
+    try {
+      const b64 = await fileToBase64(file);
+      musicData = { url: b64, name: file.name.replace(/\.[^.]+$/, '') };
+      showMusicPreview();
+    } catch(e2) {
+      alert(`Gagal upload musik: ${e.message}`);
+    }
+  }
+  prog.style.display = 'none';
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+
+function showMusicPreview() {
+  document.getElementById('music-dz').style.display = 'none';
+  document.getElementById('music-preview').style.display = 'block';
+  document.getElementById('music-filename').textContent = musicData.name;
+}
+
+function removeMusic() {
+  musicData = null;
+  document.getElementById('music-dz').style.display = 'flex';
+  document.getElementById('music-preview').style.display = 'none';
+  document.getElementById('music-input').value = '';
+}
+
+/* ══════════════════════════════════════
+   MUSIC PLAYER
+══════════════════════════════════════ */
+function toggleMusic() {
+  const audio = document.getElementById('bg-audio');
+  const btn = document.getElementById('mbar-play-btn');
+  const eq = document.getElementById('mbar-eq');
+  if (musicPlaying) {
+    audio.pause(); musicPlaying = false;
+    btn.textContent = '▶'; eq.classList.add('paused');
+  } else {
+    audio.play().catch(() => {});
+    musicPlaying = true; btn.textContent = '⏸'; eq.classList.remove('paused');
+  }
+}
+
+/* ══════════════════════════════════════
+   GALAXY ORBIT ENGINE
+══════════════════════════════════════ */
+let galaxyRAF = null;
+let galaxyPhotos = []; // loaded Image objects with meta
+let orbitPlanets = [];
+let galaxyStars = [];
+let galaxyNebulas = [];
+let canvasW = 0, canvasH = 0;
+let cx = 0, cy = 0;
+
+const ORBIT_COLORS = [
+  'rgba(249,168,201,', // pink
+  'rgba(245,200,66,',  // gold
+  'rgba(168,240,216,', // mint
+  'rgba(212,180,248,', // lavender
+  'rgba(147,197,253,', // blue
+  'rgba(253,186,116,', // peach
+];
+
+function initGalaxy(d) {
+  document.getElementById('galaxy-name').textContent = `untuk ${d.name || 'kamu'}`;
+
+  const canvas = document.getElementById('galaxy-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Resize canvas
+  function resize() {
+    canvasW = canvas.width  = window.innerWidth;
+    canvasH = canvas.height = window.innerHeight;
+    cx = canvasW / 2;
+    cy = canvasH / 2;
+  }
+  resize();
+  window.addEventListener('resize', () => { resize(); buildOrbits(); });
+
+  // Build stars
+  galaxyStars = [];
+  for (let i = 0; i < 280; i++) {
+    galaxyStars.push({
+      x: Math.random() * canvasW,
+      y: Math.random() * canvasH,
+      r: Math.random() * 1.4 + 0.2,
+      alpha: Math.random() * 0.7 + 0.15,
+      twinkleSpeed: Math.random() * 0.02 + 0.005,
+      twinkleOffset: Math.random() * Math.PI * 2,
+      color: Math.random() > 0.85 ? '#f9a8c9' : Math.random() > 0.7 ? '#f5c842' : '#ffffff',
+    });
+  }
+
+  // Nebula blobs
+  galaxyNebulas = [
+    { x: canvasW * 0.2, y: canvasH * 0.3, r: canvasW * 0.3, color: 'rgba(249,168,201,0.035)' },
+    { x: canvasW * 0.8, y: canvasH * 0.7, r: canvasW * 0.28, color: 'rgba(212,180,248,0.03)' },
+    { x: canvasW * 0.5, y: canvasH * 0.5, r: canvasW * 0.35, color: 'rgba(168,240,216,0.025)' },
+    { x: canvasW * 0.15, y: canvasH * 0.8, r: canvasW * 0.22, color: 'rgba(245,200,66,0.02)' },
+  ];
+
+  // Load photo images
+  const photoItems = (d.items || []).filter(it => it.type === 'photo');
+  galaxyPhotos = [];
+  let loaded = 0;
+
+  if (photoItems.length === 0) {
+    buildOrbits();
+    startGalaxyLoop(ctx);
+    return;
+  }
+
+  photoItems.forEach((item, i) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      galaxyPhotos.push({ img, url: item.url, cap: item.cap || '', idx: i });
+      loaded++;
+      if (loaded === photoItems.length) {
+        buildOrbits();
+        startGalaxyLoop(ctx);
+      }
+    };
+    img.onerror = () => {
+      loaded++;
+      if (loaded === photoItems.length) {
+        buildOrbits();
+        startGalaxyLoop(ctx);
+      }
+    };
+    img.src = item.url;
+  });
+
+  // Touch/click on canvas to tap planets
+  canvas.addEventListener('click', onGalaxyTap);
+  canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    onGalaxyTap({ clientX: t.clientX, clientY: t.clientY });
+  }, { passive: false });
+}
+
+function buildOrbits() {
+  orbitPlanets = [];
+  const n = galaxyPhotos.length;
+  if (n === 0) return;
+
+  const minDim = Math.min(canvasW, canvasH);
+
+  // Distribute photos across multiple orbits
+  // Up to 3 photos per orbit ring, rest on outer rings
+  const ORBITS = [];
+  const ORBIT_RADII_BASE = [0.18, 0.29, 0.40, 0.50, 0.60];
+  let orbitIdx = 0;
+  let countInOrbit = 0;
+  const maxPerOrbit = [3, 4, 5, 6, 7];
+
+  galaxyPhotos.forEach((ph, i) => {
+    if (orbitIdx >= ORBIT_RADII_BASE.length) orbitIdx = ORBIT_RADII_BASE.length - 1;
+    if (!ORBITS[orbitIdx]) ORBITS[orbitIdx] = [];
+    ORBITS[orbitIdx].push(ph);
+    countInOrbit++;
+    if (countInOrbit >= (maxPerOrbit[orbitIdx] || 5)) {
+      orbitIdx++;
+      countInOrbit = 0;
+    }
+  });
+
+  ORBITS.forEach((photosInOrbit, oi) => {
+    const radius = ORBIT_RADII_BASE[oi] * minDim;
+    const col = ORBIT_COLORS[oi % ORBIT_COLORS.length];
+    const speed = (0.00018 + oi * 0.00004) * (oi % 2 === 0 ? 1 : -1); // alternating direction
+    const photoSize = Math.max(28, Math.min(52, minDim * 0.072 - oi * 3));
+
+    photosInOrbit.forEach((ph, pi) => {
+      const angleOffset = (2 * Math.PI / photosInOrbit.length) * pi;
+      orbitPlanets.push({
+        ph,
+        orbitRadius: radius,
+        orbitSpeed: speed,
+        angle: angleOffset,
+        size: photoSize,
+        color: col,
+        glowPhase: Math.random() * Math.PI * 2,
+        glowSpeed: 0.03 + Math.random() * 0.02,
+        orbitIdx: oi,
+      });
+    });
+  });
+}
+
+let galaxyT = 0;
+function startGalaxyLoop(ctx) {
+  if (galaxyRAF) cancelAnimationFrame(galaxyRAF);
+  function loop() {
+    galaxyT++;
+    drawGalaxy(ctx);
+    galaxyRAF = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function stopGalaxy() {
+  if (galaxyRAF) { cancelAnimationFrame(galaxyRAF); galaxyRAF = null; }
+}
+
+function drawGalaxy(ctx) {
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  // Deep space gradient bg
+  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(canvasW, canvasH) * 0.8);
+  bgGrad.addColorStop(0, '#0d0010');
+  bgGrad.addColorStop(0.4, '#080008');
+  bgGrad.addColorStop(1, '#000000');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  // Nebula blobs
+  galaxyNebulas.forEach(nb => {
+    const grad = ctx.createRadialGradient(nb.x, nb.y, 0, nb.x, nb.y, nb.r);
+    grad.addColorStop(0, nb.color);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(nb.x, nb.y, nb.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Stars with twinkling
+  galaxyStars.forEach(s => {
+    const alpha = s.alpha * (0.5 + 0.5 * Math.sin(galaxyT * s.twinkleSpeed + s.twinkleOffset));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.color.replace(')', `,${alpha})`).replace('#ffffff', `rgba(255,255,255,${alpha})`).replace('#f9a8c9', `rgba(249,168,201,${alpha})`).replace('#f5c842', `rgba(245,200,66,${alpha})`);
+    ctx.fill();
+  });
+
+  // Central glow (sun/core)
+  const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+  coreGlow.addColorStop(0, 'rgba(255,220,240,0.9)');
+  coreGlow.addColorStop(0.15, 'rgba(249,168,201,0.6)');
+  coreGlow.addColorStop(0.4, 'rgba(232,121,160,0.2)');
+  coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = coreGlow;
+  ctx.beginPath(); ctx.arc(cx, cy, 60, 0, Math.PI * 2); ctx.fill();
+
+  // Core dot
+  ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff8fc';
+  ctx.shadowColor = '#f9a8c9'; ctx.shadowBlur = 20;
+  ctx.fill(); ctx.shadowBlur = 0;
+
+  // Birthday emoji on core
+  ctx.font = '18px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🎂', cx, cy);
+
+  // Draw orbit rings
+  const drawnOrbits = new Set();
+  orbitPlanets.forEach(planet => {
+    if (!drawnOrbits.has(planet.orbitIdx)) {
+      drawnOrbits.add(planet.orbitIdx);
+      ctx.beginPath();
+      ctx.arc(cx, cy, planet.orbitRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = planet.color + '0.12)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 8]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  });
+
+  // Update & draw planets
+  orbitPlanets.forEach(planet => {
+    planet.angle += planet.orbitSpeed;
+    const px = cx + Math.cos(planet.angle) * planet.orbitRadius;
+    const py = cy + Math.sin(planet.angle) * planet.orbitRadius;
+    planet._x = px; planet._y = py; // store for tap detection
+
+    const glowAlpha = 0.4 + 0.3 * Math.sin(galaxyT * planet.glowSpeed + planet.glowPhase);
+    const sz = planet.size;
+
+    // Outer glow ring
+    const glowGrad = ctx.createRadialGradient(px, py, sz * 0.5, px, py, sz * 1.4);
+    glowGrad.addColorStop(0, planet.color + glowAlpha + ')');
+    glowGrad.addColorStop(1, planet.color + '0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath(); ctx.arc(px, py, sz * 1.4, 0, Math.PI * 2); ctx.fill();
+
+    // Clip & draw photo
+    ctx.save();
+    ctx.beginPath(); ctx.arc(px, py, sz, 0, Math.PI * 2); ctx.clip();
+
+    if (planet.ph.img && planet.ph.img.complete && planet.ph.img.naturalWidth > 0) {
+      // Draw image centered & square-cropped
+      const iw = planet.ph.img.naturalWidth, ih = planet.ph.img.naturalHeight;
+      const scale = (sz * 2) / Math.min(iw, ih);
+      const dw = iw * scale, dh = ih * scale;
+      ctx.drawImage(planet.ph.img, px - dw/2, py - dh/2, dw, dh);
+    } else {
+      // Fallback colored circle
+      ctx.fillStyle = planet.color + '0.6)';
+      ctx.fillRect(px - sz, py - sz, sz * 2, sz * 2);
+    }
+    ctx.restore();
+
+    // Border ring
+    ctx.beginPath(); ctx.arc(px, py, sz, 0, Math.PI * 2);
+    ctx.strokeStyle = planet.color + (0.5 + glowAlpha * 0.5) + ')';
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = planet.color + '0.8)';
+    ctx.shadowBlur = 8;
+    ctx.stroke(); ctx.shadowBlur = 0;
+
+    // Tiny star trail dots along orbit
+    for (let t = 1; t <= 3; t++) {
+      const trailAngle = planet.angle - planet.orbitSpeed * t * 8;
+      const tx = cx + Math.cos(trailAngle) * planet.orbitRadius;
+      const ty = cy + Math.sin(trailAngle) * planet.orbitRadius;
+      const ta = (0.4 - t * 0.12) * Math.abs(planet.orbitSpeed) * 800;
+      ctx.beginPath(); ctx.arc(tx, ty, 1.2, 0, Math.PI * 2);
+      ctx.fillStyle = planet.color + Math.max(0, ta) + ')';
+      ctx.fill();
+    }
+  });
+
+  // Shooting star occasionally
+  if (galaxyT % 280 < 60) {
+    const progress = (galaxyT % 280) / 60;
+    const sx = canvasW * 0.1 + canvasW * 0.8 * progress;
+    const sy = canvasH * 0.15 - canvasH * 0.08 * progress;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx - 40 * progress, sy + 16 * progress);
+    const sg = ctx.createLinearGradient(sx - 40, sy + 16, sx, sy);
+    sg.addColorStop(0, 'rgba(255,255,255,0)');
+    sg.addColorStop(1, 'rgba(255,255,255,0.8)');
+    ctx.strokeStyle = sg;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+}
+
+function onGalaxyTap(e) {
+  // Check if lightbox is open
+  const lb = document.getElementById('galaxy-lightbox');
+  if (lb.style.display === 'flex') return;
+
+  const rect = document.getElementById('galaxy-canvas').getBoundingClientRect();
+  const tapX = e.clientX - rect.left;
+  const tapY = e.clientY - rect.top;
+
+  for (const planet of orbitPlanets) {
+    if (!planet._x) continue;
+    const dist = Math.hypot(tapX - planet._x, tapY - planet._y);
+    if (dist <= planet.size + 10) {
+      openLightbox(planet.ph.url, planet.ph.cap);
+      return;
+    }
+  }
+}
+
+function openLightbox(url, cap) {
+  const lb = document.getElementById('galaxy-lightbox');
+  document.getElementById('galaxy-lb-img').src = url;
+  document.getElementById('galaxy-lb-cap').textContent = cap || '';
+  lb.style.display = 'flex';
+  lb.style.animation = 'fadeIn .3s ease both';
+}
+
+function closeLightbox() {
+  document.getElementById('galaxy-lightbox').style.display = 'none';
+}
+
+function goToAlbumFromGalaxy() {
+  stopGalaxy();
+  buildAlbum(gData);
+  showScreen('s-album');
+  confetti(30);
+  // start music
+  if (gData.music && gData.music.url) {
+    const audio = document.getElementById('bg-audio');
+    audio.src = gData.music.url;
+    document.getElementById('mbar-title').textContent = gData.music.name || 'Lagu spesial';
+    document.getElementById('music-bar').classList.add('on');
+    setTimeout(() => {
+      audio.play().then(() => {
+        musicPlaying = true;
+        document.getElementById('mbar-play-btn').textContent = '⏸';
+        document.getElementById('mbar-eq').classList.remove('paused');
+      }).catch(() => {});
+    }, 400);
+  }
 }
 
 /* ══════════════════════════════════════
