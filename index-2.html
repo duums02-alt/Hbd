@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Surprise!</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== ROOT ===== */
+:root {
+  --pink: #f9a8c9;
+  --pink-d: #e06b9a;
+  --pink-dd: #c2446e;
+  --cream: #fff8f2;
+  --peach: #fde8d8;
+  --rose: #fce4ec;
+  --text: #3d2b2b;
+  --muted: #b08080;
+  --white: #ffffff;
+  --gold: #f5c842;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { width:100%; min-height:100vh; font-family:'Nunito',sans-serif; background:var(--cream); overflow-x:hidden; }
+
+/* ===== PAGES ===== */
+.page { display:none; position:relative; z-index:1; min-height:100vh; width:100%; flex-direction:column; align-items:center; justify-content:center; padding:24px 20px 80px; overflow:hidden; }
+.page.active { display:flex; }
+
+/* ===== FLOATING PETALS BG ===== */
+.petal { position:fixed; pointer-events:none; z-index:0; font-size:1rem; animation: petalFall linear infinite; opacity:0; }
+@keyframes petalFall { 0%{transform:translateY(-40px) rotate(0deg);opacity:0} 10%{opacity:.7} 90%{opacity:.3} 100%{transform:translateY(105vh) rotate(540deg);opacity:0} }
+
+/* ===== AUDIO BAR ===== */
+#audio-bar { position:fixed; bottom:0; left:0; right:0; z-index:500; background:rgba(255,255,255,.94); backdrop-filter:blur(14px); border-top:1px solid #fce4ec; padding:9px 16px; display:flex; align-items:center; gap:10px; }
+.play-b { width:36px; height:36px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--pink-d),var(--pink-dd)); border:none; cursor:pointer; color:#fff; font-size:.85rem; box-shadow:0 3px 10px rgba(224,107,154,.35); transition:transform .15s; }
+.play-b:active { transform:scale(.9); }
+.aud-info { flex:1; overflow:hidden; }
+.aud-title { font-size:.78rem; font-weight:800; color:var(--pink-dd); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.aud-sub { font-size:.68rem; color:var(--muted); }
+.eq { display:flex; gap:2px; align-items:flex-end; height:16px; }
+.eq span { width:3px; border-radius:2px; background:var(--pink-d); animation:eqA .5s ease-in-out infinite alternate; }
+.eq span:nth-child(1){height:9px} .eq span:nth-child(2){height:6px;animation-delay:.1s} .eq span:nth-child(3){height:13px;animation-delay:.22s} .eq span:nth-child(4){height:5px;animation-delay:.33s}
+.eq.off span { animation-play-state:paused; height:3px!important; }
+@keyframes eqA { from{transform:scaleY(.3)} to{transform:scaleY(1.2)} }
+audio { display:none; }
+
+/* ===== CONFETTI ===== */
+.cf { position:fixed; top:-20px; pointer-events:none; z-index:999; border-radius:2px; animation:cfFall linear forwards; }
+@keyframes cfFall { to{transform:translateY(110vh) rotate(720deg);opacity:0} }
+
+/* ===== SPEECH BUBBLE ===== */
+.bubble { position:relative; background:#fff; border-radius:18px; padding:10px 16px; font-size:.85rem; font-weight:700; color:var(--text); box-shadow:0 4px 16px rgba(0,0,0,.08); border:2px solid var(--rose); display:inline-block; max-width:240px; text-align:center; line-height:1.4; }
+.bubble::after { content:''; position:absolute; bottom:-10px; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:#fff; filter:drop-shadow(0 2px 2px rgba(0,0,0,.06)); }
+.bubble.left::after { left:30px; }
+.bubble.right::after { left:auto; right:30px; }
+
+/* ===========================
+   FAT CAT SVG COMPONENTS
+   =========================== */
+
+/* Base cat styles - drawn inline via JS */
+.cat-wrap { position:relative; display:inline-block; }
+.cat-svg { overflow:visible; }
+
+/* ===========================
+   PAGE 1: ADMIN
+   =========================== */
+#pg-admin {
+  background: linear-gradient(160deg, #1a1025 0%, #2d1535 100%);
+  justify-content:flex-start; padding-top:36px; padding-bottom:100px; gap:0;
+}
+.adm-logo { font-size:1.8rem; text-align:center; margin-bottom:4px; }
+.adm-h { font-family:'Playfair Display',serif; font-size:1.4rem; color:#fff; text-align:center; margin-bottom:2px; }
+.adm-sub { font-size:.7rem; color:#6b7280; text-align:center; margin-bottom:20px; letter-spacing:1.5px; text-transform:uppercase; }
+.card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:18px; width:100%; max-width:480px; margin:0 auto 12px; }
+.card-title { font-size:.68rem; font-weight:800; color:#9ca3af; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px; }
+.field { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+.field:last-child { margin-bottom:0; }
+.field label { font-size:.75rem; font-weight:700; color:#d1d5db; }
+.field input,.field textarea,.field select { background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.12); border-radius:9px; padding:9px 12px; font-size:.88rem; font-family:'Nunito'; color:#f9fafb; outline:none; transition:border .2s; width:100%; }
+.field input:focus,.field textarea:focus,.field select:focus { border-color:var(--pink); }
+.field textarea { resize:vertical; min-height:80px; }
+.field select option { background:#1a1025; color:#fff; }
+.field input[type=file] { padding:7px; cursor:pointer; }
+.field small { color:#6b7280; font-size:.7rem; }
+.gen-btn { width:100%; max-width:480px; margin:0 auto; display:block; padding:14px; border:none; border-radius:50px; background:linear-gradient(135deg,var(--pink-d),var(--pink-dd)); color:#fff; font-size:.95rem; font-weight:800; font-family:'Nunito'; cursor:pointer; box-shadow:0 6px 22px rgba(224,107,154,.4); letter-spacing:.3px; transition:transform .15s; }
+.gen-btn:active { transform:scale(.97); }
+.result-box { display:none; width:100%; max-width:480px; margin:12px auto 0; background:rgba(249,168,201,.08); border:1.5px solid rgba(249,168,201,.3); border-radius:14px; padding:16px; }
+.result-box.show { display:block; }
+.result-label { font-size:.68rem; color:#9ca3af; margin-bottom:4px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+.result-link { font-size:.72rem; color:var(--pink); word-break:break-all; line-height:1.5; margin-bottom:10px; background:rgba(0,0,0,.2); padding:8px 10px; border-radius:8px; }
+.copy-btn { padding:9px 20px; border:1.5px solid var(--pink); border-radius:50px; background:transparent; color:var(--pink); font-size:.82rem; font-weight:700; font-family:'Nunito'; cursor:pointer; transition:all .2s; }
+.copy-btn:active { background:var(--pink); color:#fff; }
+.result-note { font-size:.7rem; color:#6b7280; margin-top:8px; line-height:1.6; }
+
+/* ===========================
+   PAGE 2: COUNTDOWN
+   =========================== */
+#pg-cd {
+  background: radial-gradient(ellipse at 40% 60%, #fce4ec 0%, var(--cream) 65%);
+  gap: 0; text-align:center;
+}
+.cd-label { font-size:.7rem; letter-spacing:4px; text-transform:uppercase; color:var(--pink-d); margin-bottom:8px; }
+.cd-name { font-family:'Playfair Display',serif; font-size:clamp(2rem,8vw,4.4rem); color:var(--pink-dd); line-height:1.1; margin-bottom:6px; }
+.cd-tag { font-family:'Playfair Display',serif; font-style:italic; font-size:clamp(.9rem,3vw,1.3rem); color:var(--pink-d); margin-bottom:36px; }
+.ring-wrap { position:relative; width:146px; height:146px; margin:0 auto 20px; }
+.ring-wrap svg { transform:rotate(-90deg); }
+.ring-bg { fill:none; stroke:#fce4ec; stroke-width:8; }
+.ring-fill { fill:none; stroke:var(--pink-d); stroke-width:8; stroke-linecap:round; stroke-dasharray:408; stroke-dashoffset:0; transition:stroke-dashoffset .9s ease; }
+.cd-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:3.3rem; color:var(--pink-dd); }
+
+/* Cat: running with countdown */
+#cat-cd { margin:16px auto 0; position:relative; width:100px; }
+#cat-cd .bubble { font-size:.75rem; margin-bottom:8px; }
+
+/* ===========================
+   PAGE 3: GIFT (cat running → crash)
+   =========================== */
+#pg-gift {
+  background: radial-gradient(ellipse at 50% 40%, #fce4ec 0%, var(--cream) 65%);
+  gap:12px; text-align:center;
+}
+.gift-title { font-family:'Playfair Display',serif; font-size:clamp(1.3rem,4.5vw,2rem); color:var(--pink-dd); }
+.gift-sub { font-size:.82rem; color:var(--muted); }
+
+/* Running track */
+.track { position:relative; width:100%; max-width:340px; height:110px; margin:0 auto; overflow:hidden; }
+.track-ground { position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--pink-d),transparent); border-radius:2px; }
+#cat-runner { position:absolute; bottom:3px; left:-80px; animation:catRun 2.2s ease forwards; }
+@keyframes catRun { 0%{left:-80px} 70%{left:calc(100% - 90px)} 72%{left:calc(100% - 70px);transform:scaleX(-1) rotate(0deg)} 76%{left:calc(100% - 60px);transform:scaleX(-1) rotate(10deg)} 80%{left:calc(100% - 80px);transform:scaleX(-1) rotate(-5deg)} 100%{left:calc(50% - 45px);transform:none} }
+
+/* Wall crash effect */
+.wall { position:absolute; right:0; bottom:0; top:0; width:6px; background:linear-gradient(180deg,#fda4af,#f43f5e); border-radius:3px 0 0 3px; }
+.stars-wrap { position:absolute; right:10px; top:10px; display:none; }
+.stars-wrap.show { display:block; animation:starsAnim .4s ease; }
+@keyframes starsAnim { from{transform:scale(0) rotate(-30deg);opacity:0} to{transform:scale(1) rotate(0deg);opacity:1} }
+
+/* Giftbox tap */
+.giftbox-wrap { cursor:pointer; display:inline-block; animation:gFloat 3s ease-in-out infinite; filter:drop-shadow(0 12px 24px rgba(224,107,154,.3)); transition:transform .15s; }
+.giftbox-wrap:active { transform:scale(.94); }
+.giftbox-wrap.shk { animation:gFloat 3s ease-in-out infinite, gShake .3s ease; }
+.giftbox-wrap.exp { animation:gExplode .4s ease forwards!important; }
+@keyframes gFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes gShake { 0%,100%{transform:rotate(0)} 30%{transform:rotate(-7deg) translateY(-5px)} 70%{transform:rotate(7deg) translateY(-3px)} }
+@keyframes gExplode { 0%{transform:scale(1);opacity:1} 60%{transform:scale(1.4);opacity:.3} 100%{transform:scale(0);opacity:0} }
+
+/* ===========================
+   PLOT TWIST: EMPTY BOX
+   =========================== */
+#pg-empty {
+  background: radial-gradient(ellipse at 50% 50%, #fff0f6 0%, var(--cream) 65%);
+  gap:20px; text-align:center;
+}
+.empty-title { font-family:'Playfair Display',serif; font-size:clamp(1.4rem,5vw,2.2rem); color:var(--text); }
+.empty-sub { font-size:.9rem; color:var(--muted); max-width:260px; line-height:1.7; }
+#cat-confused { margin:0 auto; }
+
+/* ===========================
+   PAGE 4: LETTER (cat panting)
+   =========================== */
+#pg-letter {
+  background: linear-gradient(160deg,#fff0f6 0%,var(--cream) 50%,#fef9ec 100%);
+  justify-content:flex-start; padding-top:44px; gap:0;
+}
+.env-wrap { width:100%; max-width:460px; margin:0 auto; }
+.env-scene { position:relative; width:220px; height:148px; margin:0 auto; cursor:pointer; }
+.env-body { position:absolute; inset:0; background:linear-gradient(145deg,var(--pink),var(--pink-d)); border-radius:12px; box-shadow:0 8px 24px rgba(224,107,154,.3); }
+.env-flap { position:absolute; top:0; left:0; right:0; height:50%; background:linear-gradient(160deg,var(--pink-dd),var(--pink-d)); border-radius:12px 12px 0 0; clip-path:polygon(0 0,50% 62%,100% 0); transform-origin:top; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+.env-open .env-flap { transform:rotateX(-180deg); }
+.env-icon { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2.2rem; animation:hbeat 1.4s ease-in-out infinite; }
+.env-hint { text-align:center; margin-top:10px; font-size:.78rem; color:var(--muted); animation:blink 1.8s ease-in-out infinite; }
+.letter-card { background:#fff; border-radius:18px; padding:24px 20px; margin-top:16px; box-shadow:0 4px 30px rgba(224,107,154,.1); border:1px solid #fce4ec; position:relative; overflow:hidden; display:none; animation:slideUp .6s ease both; }
+.letter-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--pink),var(--pink-d),var(--gold)); }
+.letter-card.show { display:block; }
+.lt-to { font-family:'Playfair Display',serif; font-size:1.35rem; color:var(--pink-dd); margin-bottom:12px; }
+.lt-body { font-size:.93rem; line-height:1.9; color:#5a4040; white-space:pre-line; margin-bottom:16px; }
+.lt-sig { font-family:'Playfair Display',serif; font-style:italic; font-size:1.1rem; color:var(--pink-d); text-align:right; margin-bottom:16px; }
+.next-btn { display:block; width:100%; padding:12px; border:none; border-radius:50px; background:linear-gradient(135deg,var(--pink-d),var(--pink-dd)); color:#fff; font-size:.9rem; font-weight:800; font-family:'Nunito'; cursor:pointer; box-shadow:0 5px 16px rgba(224,107,154,.35); }
+.next-btn:active { transform:scale(.97); }
+
+/* ===========================
+   PAGE 5: GALLERY (cat dancing)
+   =========================== */
+#pg-gallery {
+  background: linear-gradient(180deg,#fff0f6 0%,var(--cream) 100%);
+  justify-content:flex-start; padding-top:40px; gap:0;
+}
+.gal-hd { text-align:center; margin-bottom:18px; width:100%; max-width:400px; }
+.gal-title { font-family:'Playfair Display',serif; font-size:clamp(1.4rem,5vw,2rem); color:var(--pink-dd); margin-bottom:3px; }
+.gal-sub { font-size:.8rem; color:var(--muted); }
+.slide-wrap { width:100%; max-width:360px; margin:0 auto; }
+.slide { display:none; flex-direction:column; align-items:center; gap:12px; animation:slideUp .5s ease both; }
+.slide.active { display:flex; }
+.photo-frame { width:100%; aspect-ratio:4/3; border-radius:16px; overflow:hidden; box-shadow:0 10px 32px rgba(224,107,154,.22); background:var(--rose); position:relative; }
+.photo-frame img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--rose),var(--peach)); font-size:3rem; color:var(--pink-d); font-family:'Playfair Display',serif; flex-direction:column; gap:8px; }
+.photo-ph span { font-size:.85rem; color:var(--muted); }
+.photo-badge { position:absolute; top:10px; right:10px; background:rgba(255,255,255,.9); backdrop-filter:blur(4px); border-radius:20px; padding:3px 9px; font-size:.72rem; font-weight:800; color:var(--pink-dd); }
+.photo-cap { font-family:'Playfair Display',serif; font-style:italic; font-size:.93rem; color:var(--pink-dd); text-align:center; padding:0 8px; }
+.gal-nav { display:flex; align-items:center; gap:10px; margin-top:12px; }
+.dots { display:flex; gap:5px; }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--rose); transition:all .3s; }
+.dot.on { background:var(--pink-d); width:16px; border-radius:4px; }
+.nav-b { width:40px; height:40px; border-radius:50%; border:2px solid var(--rose); background:#fff; cursor:pointer; font-size:.95rem; color:var(--pink-d); box-shadow:0 2px 8px rgba(224,107,154,.1); }
+.nav-b:active { background:var(--pink-d); color:#fff; border-color:var(--pink-d); }
+.nav-b:disabled { opacity:.3; cursor:not-allowed; }
+.finish-btn { display:none; margin-top:16px; padding:12px 30px; border:none; border-radius:50px; background:linear-gradient(135deg,var(--pink-d),var(--pink-dd)); color:#fff; font-size:.9rem; font-weight:800; font-family:'Nunito'; cursor:pointer; box-shadow:0 5px 16px rgba(224,107,154,.35); animation:slideUp .5s ease both; }
+.finish-btn:active { transform:scale(.97); }
+
+/* ===========================
+   PAGE 6: FINAL (cat sleeping)
+   =========================== */
+#pg-final {
+  background: radial-gradient(ellipse at 50% 40%, #fce4ec 0%, var(--cream) 60%);
+  text-align:center; gap:14px;
+}
+.final-title { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,6vw,3rem); color:var(--pink-dd); line-height:1.2; }
+.final-msg { font-size:.93rem; color:var(--muted); max-width:280px; line-height:1.8; }
+
+/* ===========================
+   CAT ANIMATIONS
+   =========================== */
+
+/* Running legs */
+@keyframes legRun { 0%,100%{transform:rotate(-30deg)} 50%{transform:rotate(30deg)} }
+@keyframes tailWag { 0%,100%{transform:rotate(-20deg)} 50%{transform:rotate(20deg)} }
+@keyframes earWiggle { 0%,100%{transform:rotate(0deg)} 50%{transform:rotate(-15deg)} }
+/* Panting */
+@keyframes pant { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+@keyframes tongueOut { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(1.3)} }
+/* Confused */
+@keyframes confusedBounce { 0%,100%{transform:translateY(0) rotate(0deg)} 25%{transform:translateY(-4px) rotate(-5deg)} 75%{transform:translateY(-2px) rotate(5deg)} }
+/* Dancing */
+@keyframes dance { 0%{transform:rotate(-8deg) translateY(0)} 25%{transform:rotate(8deg) translateY(-6px)} 50%{transform:rotate(-6deg) translateY(0)} 75%{transform:rotate(6deg) translateY(-4px)} 100%{transform:rotate(-8deg) translateY(0)} }
+/* Sleeping */
+@keyframes sleep { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes zzFloat { 0%{transform:translateY(0) scale(1);opacity:1} 100%{transform:translateY(-30px) scale(1.5);opacity:0} }
+/* Heartbeat */
+@keyframes hbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.18)} 28%{transform:scale(1)} 42%{transform:scale(1.08)} }
+/* Star spin */
+@keyframes starSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* Utility */
+@keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+</style>
+</head>
+<body>
+
+<!-- Petals bg -->
+<div id="petals"></div>
+
+<!-- ======== ADMIN PAGE ======== -->
+<section class="page" id="pg-admin">
+  <div class="adm-logo">✦</div>
+  <div class="adm-h">Admin Panel</div>
+  <div class="adm-sub">isi · generate · share</div>
+
+  <div class="card">
+    <div class="card-title">Pesan & Teks</div>
+    <div class="field"><label>Nama Penerima</label><input id="a-name" placeholder="Nama dia..." value="Seseorang Spesial"></div>
+    <div class="field"><label>Tagline</label><input id="a-tag" value="Ada sesuatu buat kamu..."></div>
+    <div class="field"><label>Judul Surat</label><input id="a-lto" value="Dear Sayang,"></div>
+    <div class="field"><label>Isi Surat</label><textarea id="a-lbody">Terima kasih sudah ada di hidupku. Setiap hari bersamamu adalah hadiah yang paling berharga. Semoga hari-harimu selalu dipenuhi kebahagiaan.
+
+Aku bersyukur mengenalmu. Kamu luar biasa.</textarea></div>
+    <div class="field"><label>Tanda Tangan</label><input id="a-sig" value="— Dengan cinta"></div>
+    <div class="field"><label>Pesan Akhir</label><input id="a-final" value="Semoga harimu selalu indah"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Countdown</div>
+    <div class="field"><label>Durasi</label>
+      <select id="a-cd"><option value="3">3 detik</option><option value="5" selected>5 detik</option><option value="7">7 detik</option></select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Musik</div>
+    <div class="field"><label>Upload MP3</label>
+      <input type="file" id="a-music" accept="audio/*">
+      <small>Sebaiknya ukuran file di bawah 2MB</small>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Foto (maks 5)</div>
+    <div class="field">
+      <label>Upload Foto</label>
+      <input type="file" id="a-photos" accept="image/*" multiple onchange="onPhotosChange(this)">
+      <small>Foto dikompres otomatis</small>
+    </div>
+    <div id="cap-wrap" style="display:none">
+      <div class="field"><label>Keterangan Foto</label><div id="cap-list" style="display:flex;flex-direction:column;gap:6px"></div></div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="gen-btn" onclick="generate()">Generate Link Surprise</button>
+
+  <div class="result-box" id="result-box">
+    <div class="result-label">Link untuk penerima</div>
+    <div class="result-link" id="result-link">-</div>
+    <button class="copy-btn" onclick="copyLink()">Salin Link</button>
+    <div class="result-note">Kirim link ini ke dia. Begitu dibuka, langsung tampil surprise!</div>
+  </div>
+</section>
+
+<!-- ======== COUNTDOWN ======== -->
+<section class="page" id="pg-cd">
+  <div class="cd-label">Untuk</div>
+  <div class="cd-name" id="u-name">Seseorang Spesial</div>
+  <div class="cd-tag" id="u-tag">Ada sesuatu buat kamu...</div>
+  <div class="ring-wrap">
+    <svg width="146" height="146" viewBox="0 0 146 146">
+      <circle class="ring-bg" cx="73" cy="73" r="64"/>
+      <circle class="ring-fill" id="ring" cx="73" cy="73" r="64"/>
+    </svg>
+    <div class="cd-num" id="cd-num">5</div>
+  </div>
+
+  <!-- Cat with countdown bubble -->
+  <div id="cat-cd" style="text-align:center;margin-top:8px;">
+    <div class="bubble" id="cd-bubble" style="margin:0 auto 10px">Hei! Ayo kejar aku!</div>
+    <div id="cat-cd-svg"></div>
+  </div>
+</section>
+
+<!-- ======== GIFT (cat running → crash) ======== -->
+<section class="page" id="pg-gift">
+  <div class="gift-title">Tangkap kadonya!</div>
+
+  <div class="track" id="track">
+    <div id="cat-runner" style="display:none"></div>
+    <div class="wall"></div>
+    <div class="stars-wrap" id="stars">
+      <svg width="60" height="40" viewBox="0 0 60 40">
+        <text x="5" y="20" font-size="16" style="animation:starSpin 1s linear infinite;transform-origin:13px 12px">★</text>
+        <text x="25" y="12" font-size="12" fill="#f5c842" style="animation:starSpin .8s linear infinite reverse;transform-origin:31px 6px">★</text>
+        <text x="42" y="22" font-size="14" fill="#f9a8c9" style="animation:starSpin 1.2s linear infinite;transform-origin:49px 15px">★</text>
+      </svg>
+    </div>
+    <div class="track-ground"></div>
+  </div>
+
+  <div id="cat-crash-bubble" style="display:none;text-align:center;margin-bottom:12px">
+    <div class="bubble" style="margin:0 auto 10px;border-color:#fde68a;">Aduh nabrak... x_x</div>
+    <div id="cat-crash-svg"></div>
+  </div>
+
+  <div id="gift-box-wrap" style="display:none;text-align:center;">
+    <div class="bubble" style="margin:0 auto 12px">Nih kadonya... tap deh!</div>
+    <div class="giftbox-wrap" id="giftbox" onclick="tapGift()">
+      <svg width="160" height="155" viewBox="0 0 160 155">
+        <defs>
+          <linearGradient id="bx" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f9a8c9"/><stop offset="100%" stop-color="#e06b9a"/></linearGradient>
+          <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fce4ec"/><stop offset="100%" stop-color="#f9a8c9"/></linearGradient>
+        </defs>
+        <!-- box body -->
+        <rect x="15" y="84" width="130" height="68" rx="8" fill="url(#bx)"/>
+        <!-- ribbon v -->
+        <rect x="72" y="84" width="16" height="68" fill="#f5c842" opacity=".9"/>
+        <!-- ribbon h -->
+        <rect x="15" y="110" width="130" height="15" fill="#f5c842" opacity=".9"/>
+        <!-- lid -->
+        <rect x="9" y="62" width="142" height="26" rx="7" fill="url(#lid)"/>
+        <rect x="72" y="62" width="16" height="26" fill="#f5c842" opacity=".9"/>
+        <!-- bow loops -->
+        <ellipse cx="62" cy="53" rx="20" ry="12" fill="#fde68a" transform="rotate(-18 62 53)"/>
+        <ellipse cx="98" cy="53" rx="20" ry="12" fill="#fde68a" transform="rotate(18 98 53)"/>
+        <circle cx="80" cy="57" r="10" fill="#f5c842"/>
+        <!-- shine -->
+        <ellipse cx="44" cy="104" rx="10" ry="5" fill="#fff" opacity=".12" transform="rotate(-18 44 104)"/>
+      </svg>
+    </div>
+    <div class="gift-sub" id="gift-tap-hint" style="margin-top:6px;animation:blink 1.8s ease-in-out infinite">Tap kado untuk membuka</div>
+  </div>
+</section>
+
+<!-- ======== PLOT TWIST: EMPTY ======== -->
+<section class="page" id="pg-empty">
+  <div class="empty-title" id="empty-title">Eh... kosong?</div>
+  <div id="cat-confused" style="text-align:center;"></div>
+  <div class="empty-sub" id="empty-sub">Tunggu dulu...<br>kayaknya ada yang ketinggalan</div>
+  <div style="text-align:center;margin-top:16px;">
+    <div class="bubble" id="empty-bubble">Eh maaf... bentar ya!</div>
+  </div>
+</section>
+
+<!-- ======== LETTER ======== -->
+<section class="page" id="pg-letter">
+  <div class="env-wrap">
+    <!-- panting cat top -->
+    <div style="text-align:center;margin-bottom:14px;">
+      <div id="cat-pant-svg"></div>
+      <div class="bubble" style="margin:8px auto 0;font-size:.78rem">*ngos-ngosan* ini... buat kamu</div>
+    </div>
+
+    <div class="env-scene" id="env" onclick="openEnv()">
+      <div class="env-body"></div>
+      <div class="env-flap"></div>
+      <div class="env-icon">✉</div>
+    </div>
+    <div class="env-hint" id="env-hint">Tap untuk buka surat</div>
+
+    <div class="letter-card" id="lcard">
+      <div class="lt-to" id="u-lto">Dear Sayang,</div>
+      <div class="lt-body" id="u-lbody"></div>
+      <div class="lt-sig" id="u-sig"></div>
+      <button class="next-btn" onclick="goGallery()">Lihat momen kita</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======== GALLERY ======== -->
+<section class="page" id="pg-gallery">
+  <div class="gal-hd">
+    <div class="gal-title">Momen Kita</div>
+    <div class="gal-sub">kenangan indah bersamamu</div>
+  </div>
+
+  <!-- Dancing cat -->
+  <div id="cat-dance-wrap" style="text-align:center;margin-bottom:14px;">
+    <div id="cat-dance-svg"></div>
+    <div class="bubble" style="margin:6px auto 0;font-size:.75rem">Yeay foto-fotoooo!</div>
+  </div>
+
+  <div class="slide-wrap">
+    <div id="slides"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:12px">
+      <div class="gal-nav">
+        <button class="nav-b" id="btn-p" onclick="prevSlide()" disabled>‹</button>
+        <div class="dots" id="dots"></div>
+        <button class="nav-b" id="btn-n" onclick="nextSlide()">›</button>
+      </div>
+      <button class="finish-btn" id="finish-btn" onclick="goFinal()">Pesan terakhir untukmu</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======== FINAL ======== -->
+<section class="page" id="pg-final">
+  <div id="cat-sleep-wrap" style="text-align:center;"></div>
+  <div class="final-title" id="u-final-title">Semoga harimu selalu indah</div>
+  <div class="final-msg" id="u-final-msg">Kamu sangat berarti dan dicintai. Selalu.</div>
+  <div style="text-align:center;margin-top:10px;">
+    <div class="bubble">Capek lari... tapi seneng bisa nyampe sini *zzz*</div>
+  </div>
+</section>
+
+<!-- Audio -->
+<div id="audio-bar">
+  <button class="play-b" id="play-b" onclick="toggleAudio()">▶</button>
+  <div class="aud-info">
+    <div class="aud-title" id="aud-title">Lagu spesial</div>
+    <div class="aud-sub">untuk kamu</div>
+  </div>
+  <div class="eq off" id="eq"><span></span><span></span><span></span><span></span></div>
+  <audio id="aud" loop></audio>
+</div>
+
+<script>
+/* =============================================
+   FAT CAT SVG GENERATOR
+   ============================================= */
+
+// Returns SVG string of fat cat in different poses
+function catSVG(pose, size=90) {
+  const s = size;
+  const scale = s / 90;
+
+  // Color palette
+  const body = '#f5c0a0';   // peach orange
+  const belly = '#fde8d8';  // lighter belly
+  const stripe = '#e8956d'; // stripe
+  const nose = '#e06b9a';
+  const eye = '#3d2b2b';
+  const cheek = '#f9a8c9';
+  const outline = '#c47840';
+
+  let inner = '';
+
+  if (pose === 'run') {
+    inner = `
+      <!-- body -->
+      <ellipse cx="45" cy="52" rx="26" ry="22" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <ellipse cx="45" cy="58" rx="18" ry="14" fill="${belly}"/>
+      <!-- stripes -->
+      <path d="M32 44 Q36 40 40 44" stroke="${stripe}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M50 44 Q54 40 58 44" stroke="${stripe}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- head -->
+      <circle cx="45" cy="28" r="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <!-- ears -->
+      <polygon points="28,14 22,4 35,12" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <polygon points="30,13 25,6 34,12" fill="${cheek}" opacity=".5"/>
+      <polygon points="62,14 68,4 55,12" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <polygon points="60,13 65,6 56,12" fill="${cheek}" opacity=".5"/>
+      <!-- face -->
+      <circle cx="38" cy="26" r="4" fill="${eye}"/>
+      <circle cx="52" cy="26" r="4" fill="${eye}"/>
+      <circle cx="39" cy="25" r="1.5" fill="#fff"/>
+      <circle cx="53" cy="25" r="1.5" fill="#fff"/>
+      <!-- cheeks -->
+      <ellipse cx="32" cy="31" rx="5" ry="3" fill="${cheek}" opacity=".5"/>
+      <ellipse cx="58" cy="31" rx="5" ry="3" fill="${cheek}" opacity=".5"/>
+      <!-- nose -->
+      <ellipse cx="45" cy="32" rx="3" ry="2" fill="${nose}"/>
+      <path d="M42 34 Q45 37 48 34" stroke="${outline}" stroke-width="1.2" fill="none"/>
+      <!-- whiskers -->
+      <line x1="20" y1="30" x2="38" y2="32" stroke="${outline}" stroke-width=".8" opacity=".6"/>
+      <line x1="20" y1="34" x2="38" y2="34" stroke="${outline}" stroke-width=".8" opacity=".6"/>
+      <line x1="52" y1="32" x2="70" y2="30" stroke="${outline}" stroke-width=".8" opacity=".6"/>
+      <line x1="52" y1="34" x2="70" y2="34" stroke="${outline}" stroke-width=".8" opacity=".6"/>
+      <!-- tail -->
+      <path d="M70 55 Q82 45 78 35 Q74 28 80 24" stroke="${stripe}" stroke-width="5" fill="none" stroke-linecap="round" style="animation:tailWag 0.3s ease-in-out infinite alternate;transform-origin:70px 55px"/>
+      <!-- running legs -->
+      <line x1="35" y1="70" x2="28" y2="82" stroke="${body}" stroke-width="7" stroke-linecap="round" style="animation:legRun .25s ease-in-out infinite alternate;transform-origin:35px 70px"/>
+      <line x1="38" y1="71" x2="32" y2="83" stroke="${outline}" stroke-width="1.5" stroke-linecap="round" style="animation:legRun .25s ease-in-out infinite alternate;transform-origin:38px 71px"/>
+      <line x1="54" y1="70" x2="62" y2="82" stroke="${body}" stroke-width="7" stroke-linecap="round" style="animation:legRun .25s ease-in-out infinite reverse alternate;transform-origin:54px 70px"/>
+      <line x1="52" y1="71" x2="60" y2="83" stroke="${outline}" stroke-width="1.5" stroke-linecap="round" style="animation:legRun .25s ease-in-out infinite reverse alternate;transform-origin:52px 71px"/>
+    `;
+  } else if (pose === 'crash') {
+    inner = `
+      <!-- dazed body (tilted) -->
+      <g transform="rotate(20 45 55)">
+        <ellipse cx="45" cy="58" rx="26" ry="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <ellipse cx="45" cy="63" rx="18" ry="13" fill="${belly}"/>
+        <path d="M32 50 Q36 46 40 50" stroke="${stripe}" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M50 50 Q54 46 58 50" stroke="${stripe}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </g>
+      <!-- head -->
+      <circle cx="40" cy="26" r="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <!-- ears drooped -->
+      <polygon points="24,14 18,5 31,14" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <polygon points="56,14 62,5 50,14" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <!-- dizzy eyes X_X -->
+      <text x="27" y="30" font-size="12" fill="${eye}" font-weight="900">x</text>
+      <text x="44" y="30" font-size="12" fill="${eye}" font-weight="900">x</text>
+      <!-- cheeks -->
+      <ellipse cx="28" cy="33" rx="5" ry="3" fill="${cheek}" opacity=".6"/>
+      <ellipse cx="52" cy="33" rx="5" ry="3" fill="${cheek}" opacity=".6"/>
+      <!-- nose -->
+      <ellipse cx="40" cy="34" rx="3" ry="2" fill="${nose}"/>
+      <path d="M37 36 Q40 40 43 36" stroke="${outline}" stroke-width="1.2" fill="none"/>
+      <!-- tongue out -->
+      <ellipse cx="40" cy="40" rx="4" ry="3" fill="#e06b9a" style="animation:tongueOut .4s ease-in-out infinite alternate"/>
+      <!-- legs splayed -->
+      <line x1="34" y1="72" x2="22" y2="84" stroke="${body}" stroke-width="7" stroke-linecap="round"/>
+      <line x1="55" y1="72" x2="67" y2="84" stroke="${body}" stroke-width="7" stroke-linecap="round"/>
+    `;
+  } else if (pose === 'pant') {
+    inner = `
+      <!-- body -->
+      <ellipse cx="45" cy="55" rx="26" ry="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <ellipse cx="45" cy="60" rx="18" ry="12" fill="${belly}" style="animation:pant .5s ease-in-out infinite alternate"/>
+      <!-- stripes -->
+      <path d="M32 48 Q36 44 40 48" stroke="${stripe}" stroke-width="2" fill="none"/>
+      <!-- head -->
+      <circle cx="45" cy="28" r="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <!-- ears -->
+      <polygon points="28,14 22,4 35,12" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <polygon points="62,14 68,4 55,12" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+      <!-- tired half-open eyes -->
+      <path d="M34 25 Q38 22 42 25" stroke="${eye}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M48 25 Q52 22 56 25" stroke="${eye}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- sweat drops -->
+      <ellipse cx="22" cy="20" rx="3" ry="5" fill="#93c5fd" opacity=".7" transform="rotate(-15 22 20)"/>
+      <ellipse cx="68" cy="18" rx="2" ry="4" fill="#93c5fd" opacity=".7" transform="rotate(15 68 18)"/>
+      <!-- cheeks flushed -->
+      <ellipse cx="32" cy="33" rx="6" ry="3.5" fill="${cheek}" opacity=".7"/>
+      <ellipse cx="58" cy="33" rx="6" ry="3.5" fill="${cheek}" opacity=".7"/>
+      <!-- nose -->
+      <ellipse cx="45" cy="32" rx="3" ry="2" fill="${nose}"/>
+      <path d="M42 34 Q45 37 48 34" stroke="${outline}" stroke-width="1.2" fill="none"/>
+      <!-- tongue panting -->
+      <ellipse cx="45" cy="40" rx="5" ry="4" fill="#e06b9a" style="animation:tongueOut .4s ease-in-out infinite alternate"/>
+      <!-- sitting legs -->
+      <ellipse cx="32" cy="76" rx="10" ry="7" fill="${body}" stroke="${outline}" stroke-width="1.2"/>
+      <ellipse cx="58" cy="76" rx="10" ry="7" fill="${body}" stroke="${outline}" stroke-width="1.2"/>
+      <!-- tail -->
+      <path d="M68 60 Q78 68 72 78" stroke="${stripe}" stroke-width="5" fill="none" stroke-linecap="round"/>
+    `;
+  } else if (pose === 'confused') {
+    inner = `
+      <!-- body -->
+      <ellipse cx="45" cy="56" rx="26" ry="20" fill="${body}" stroke="${outline}" stroke-width="1.5" style="animation:confusedBounce 1s ease-in-out infinite"/>
+      <ellipse cx="45" cy="61" rx="18" ry="12" fill="${belly}"/>
+      <!-- head tilted -->
+      <g style="animation:confusedBounce 1s ease-in-out infinite">
+        <circle cx="48" cy="26" r="20" fill="${body}" stroke="${outline}" stroke-width="1.5" transform="rotate(10 48 26)"/>
+        <!-- ears one up one down -->
+        <polygon points="32,12 26,2 39,11" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <polygon points="64,16 70,28 55,14" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <!-- ? mark eye -->
+        <text x="38" y="32" font-size="11" fill="${eye}" font-weight="900">?</text>
+        <circle cx="54" cy="27" r="4" fill="${eye}"/>
+        <circle cx="55" cy="26" r="1.5" fill="#fff"/>
+        <!-- cheeks -->
+        <ellipse cx="34" cy="33" rx="5" ry="3" fill="${cheek}" opacity=".5"/>
+        <ellipse cx="60" cy="33" rx="5" ry="3" fill="${cheek}" opacity=".5"/>
+        <!-- nose -->
+        <ellipse cx="47" cy="33" rx="3" ry="2" fill="${nose}"/>
+      </g>
+      <!-- sitting -->
+      <ellipse cx="33" cy="76" rx="10" ry="7" fill="${body}" stroke="${outline}" stroke-width="1.2"/>
+      <ellipse cx="57" cy="76" rx="10" ry="7" fill="${body}" stroke="${outline}" stroke-width="1.2"/>
+    `;
+  } else if (pose === 'dance') {
+    inner = `
+      <!-- body dancing -->
+      <g style="animation:dance 0.5s ease-in-out infinite;transform-origin:45px 55px">
+        <ellipse cx="45" cy="56" rx="26" ry="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <ellipse cx="45" cy="61" rx="18" ry="12" fill="${belly}"/>
+        <path d="M32 48 Q36 44 40 48" stroke="${stripe}" stroke-width="2" fill="none"/>
+        <path d="M50 48 Q54 44 58 48" stroke="${stripe}" stroke-width="2" fill="none"/>
+        <!-- arms up -->
+        <path d="M22 50 Q14 38 20 30" stroke="${body}" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M68 50 Q76 38 70 30" stroke="${body}" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <!-- head -->
+        <circle cx="45" cy="26" r="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <!-- big happy eyes -->
+        <path d="M34 24 Q38 20 42 24" stroke="${eye}" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M48 24 Q52 20 56 24" stroke="${eye}" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- big smile -->
+        <path d="M36 33 Q45 40 54 33" stroke="${nose}" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- rosy cheeks -->
+        <ellipse cx="31" cy="31" rx="6" ry="3.5" fill="${cheek}" opacity=".7"/>
+        <ellipse cx="59" cy="31" rx="6" ry="3.5" fill="${cheek}" opacity=".7"/>
+        <!-- ears -->
+        <polygon points="28,12 22,2 36,12" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <polygon points="62,12 68,2 54,12" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <!-- nose -->
+        <ellipse cx="45" cy="30" rx="3" ry="2" fill="${nose}"/>
+        <!-- legs dancing -->
+        <line x1="36" y1="72" x2="28" y2="84" stroke="${body}" stroke-width="7" stroke-linecap="round" style="animation:legRun .3s ease-in-out infinite alternate;transform-origin:36px 72px"/>
+        <line x1="54" y1="72" x2="62" y2="84" stroke="${body}" stroke-width="7" stroke-linecap="round" style="animation:legRun .3s ease-in-out infinite reverse alternate;transform-origin:54px 72px"/>
+        <!-- music notes -->
+        <text x="72" y="18" font-size="13" fill="${nose}" opacity=".8" style="animation:zzFloat 1.2s ease-in-out infinite">♪</text>
+        <text x="12" y="22" font-size="10" fill="${stripe}" opacity=".7" style="animation:zzFloat 1.5s ease-in-out infinite .3s">♫</text>
+      </g>
+    `;
+  } else if (pose === 'sleep') {
+    inner = `
+      <!-- sleeping body -->
+      <g style="animation:sleep 2s ease-in-out infinite">
+        <ellipse cx="45" cy="62" rx="30" ry="18" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <ellipse cx="45" cy="66" rx="22" ry="11" fill="${belly}"/>
+        <path d="M28 55 Q32 50 36 55" stroke="${stripe}" stroke-width="2" fill="none"/>
+        <path d="M54 55 Q58 50 62 55" stroke="${stripe}" stroke-width="2" fill="none"/>
+        <!-- tail curled -->
+        <path d="M72 62 Q84 55 80 68 Q76 78 68 72" stroke="${stripe}" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <!-- head on paws -->
+        <circle cx="38" cy="34" r="20" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <!-- closed eyes -->
+        <path d="M28 32 Q32 28 36 32" stroke="${eye}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M40 32 Q44 28 48 32" stroke="${eye}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- smile -->
+        <path d="M30 38 Q38 43 46 38" stroke="${nose}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <!-- cheeks -->
+        <ellipse cx="24" cy="37" rx="5" ry="3" fill="${cheek}" opacity=".6"/>
+        <ellipse cx="52" cy="37" rx="5" ry="3" fill="${cheek}" opacity=".6"/>
+        <!-- ears -->
+        <polygon points="22,20 16,10 30,19" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <polygon points="54,20 60,10 46,19" fill="${body}" stroke="${outline}" stroke-width="1.5"/>
+        <!-- nose -->
+        <ellipse cx="38" cy="37" rx="3" ry="2" fill="${nose}"/>
+        <!-- paws -->
+        <ellipse cx="28" cy="74" rx="12" ry="7" fill="${body}" stroke="${outline}" stroke-width="1.2"/>
+        <ellipse cx="52" cy="74" rx="12" ry="7" fill="${body}" stroke="${outline}" stroke-width="1.2"/>
+      </g>
+      <!-- zzz floating -->
+      <text x="62" y="28" font-size="16" fill="${stripe}" font-weight="900" style="animation:zzFloat 1.5s ease-in-out infinite">z</text>
+      <text x="74" y="16" font-size="12" fill="${stripe}" font-weight="900" style="animation:zzFloat 1.5s ease-in-out infinite .4s">z</text>
+      <text x="84" y="8" font-size="9" fill="${stripe}" font-weight="900" style="animation:zzFloat 1.5s ease-in-out infinite .8s">z</text>
+    `;
+  }
+
+  return `<svg class="cat-svg" width="${s}" height="${s}" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+}
+
+/* =============================================
+   FLOATING PETALS
+   ============================================= */
+(function(){
+  const c = document.getElementById('petals');
+  const items = ['✿','❀','·','˚','✦'];
+  const colors = ['#f9a8c9','#fde8d8','#fce4ec','#f5c842','#fda4af'];
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.textContent = items[Math.floor(Math.random()*items.length)];
+    p.style.cssText = `left:${Math.random()*100}vw;color:${colors[Math.floor(Math.random()*colors.length)]};font-size:${.6+Math.random()*.8}rem;animation-duration:${7+Math.random()*8}s;animation-delay:${Math.random()*6}s`;
+    c.appendChild(p);
+  }
+})();
+
+/* =============================================
+   ROUTING
+   ============================================= */
+let gData = null;
+let cdTotal = 5;
+
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = location.hash.slice(1);
+  if(hash) {
+    try {
+      gData = JSON.parse(decodeURIComponent(atob(hash)));
+      applyData();
+      showPage('pg-cd');
+      startCD();
+    } catch(e) {
+      showPage('pg-admin');
+    }
+  } else {
+    showPage('pg-admin');
+  }
+});
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function applyData() {
+  const d = gData;
+  setText('u-name', d.name || 'Seseorang Spesial');
+  setText('u-tag', d.tag || '');
+  setText('u-lto', d.lto || 'Dear Sayang,');
+  setText('u-lbody', d.lbody || '');
+  setText('u-sig', d.sig || '');
+  setText('u-final-title', d.final || 'Semoga harimu selalu indah');
+  cdTotal = parseInt(d.cd || 5);
+  if(d.music) {
+    document.getElementById('aud').src = d.music;
+    if(d.musicName) setText('aud-title', d.musicName);
+  }
+  // init cats
+  document.getElementById('cat-cd-svg').innerHTML = catSVG('run', 80);
+  document.getElementById('cat-pant-svg').innerHTML = catSVG('pant', 80);
+  document.getElementById('cat-dance-svg').innerHTML = catSVG('dance', 80);
+  document.getElementById('cat-sleep-wrap').innerHTML = catSVG('sleep', 100);
+}
+function setText(id, v) { const el = document.getElementById(id); if(el) el.textContent = v; }
+
+/* =============================================
+   COUNTDOWN
+   ============================================= */
+const cdBubbles = [
+  'Hei! Ayo kejar aku!',
+  'Cepet dong!',
+  'Hampir...',
+  'Siap-siap ya!',
+  'YEAY!'
+];
+function startCD() {
+  let n = cdTotal;
+  const numEl = document.getElementById('cd-num');
+  const ring = document.getElementById('ring');
+  const bub = document.getElementById('cd-bubble');
+  const circ = 402;
+  numEl.textContent = n;
+  ring.style.strokeDashoffset = 0;
+  const tick = () => {
+    ring.style.strokeDashoffset = circ * ((cdTotal - n) / cdTotal);
+    if(bub) bub.textContent = cdBubbles[cdTotal - n] || 'Yuk yuk!';
+    if(n <= 0) { setTimeout(() => startGiftPage(), 300); return; }
+    n--;
+    numEl.textContent = n === 0 ? '!' : n;
+    setTimeout(tick, 1000);
+  };
+  setTimeout(tick, 700);
+}
+
+/* =============================================
+   GIFT PAGE: cat runs, crashes, stars, then gift
+   ============================================= */
+function startGiftPage() {
+  showPage('pg-gift');
+  const runner = document.getElementById('cat-runner');
+  runner.style.display = 'block';
+  runner.innerHTML = catSVG('run', 80);
+
+  // After run animation (2.2s), show crash
+  setTimeout(() => {
+    runner.innerHTML = catSVG('crash', 80);
+    document.getElementById('stars').classList.add('show');
+
+    setTimeout(() => {
+      // stars gone, show crash bubble
+      document.getElementById('stars').classList.remove('show');
+      document.getElementById('cat-crash-bubble').style.display = 'block';
+      document.getElementById('cat-crash-svg').innerHTML = catSVG('crash', 75);
+      runner.style.display = 'none';
+
+      // After pause, show gift
+      setTimeout(() => {
+        document.getElementById('cat-crash-bubble').style.display = 'none';
+        document.getElementById('gift-box-wrap').style.display = 'block';
+        document.getElementById('gift-box-wrap').style.animation = 'slideUp .5s ease both';
+      }, 1800);
+    }, 1000);
+  }, 2300);
+}
+
+/* =============================================
+   GIFT TAP (plot twist: empty!)
+   ============================================= */
+let taps = 0;
+const tapHints = ['Tap kado untuk membuka', 'Sekali lagi...', 'Satu lagi!'];
+function tapGift() {
+  const box = document.getElementById('giftbox');
+  const hint = document.getElementById('gift-tap-hint');
+  taps++;
+  confetti(taps === 1 ? 8 : taps === 2 ? 18 : 40);
+  if(taps < 3) {
+    box.classList.remove('shk'); void box.offsetWidth; box.classList.add('shk');
+    if(hint) hint.textContent = tapHints[taps] || '';
+  } else {
+    box.classList.remove('shk'); box.classList.add('exp');
+    setTimeout(() => {
+      // PLOT TWIST: empty box!
+      showPage('pg-empty');
+      document.getElementById('cat-confused').innerHTML = catSVG('confused', 90);
+      startEmptyTwist();
+    }, 450);
+  }
+}
+
+function startEmptyTwist() {
+  const title = document.getElementById('empty-title');
+  const sub = document.getElementById('empty-sub');
+  const bub = document.getElementById('empty-bubble');
+  const msgs = [
+    ['Eh... kosong?', 'Tunggu dulu...', 'Eh maaf... bentar ya!'],
+    ['Wah gimana ini...', 'Jangan panik dulu!', 'Ohhh ketinggalan di sini!'],
+    ['Ups!', 'Tenang tenang...', 'Ini dia sebenernya!'],
+  ];
+  let i = 0;
+  const interval = setInterval(() => {
+    i++;
+    if(i < msgs.length) {
+      title.textContent = msgs[i][0];
+      sub.innerHTML = msgs[i][1];
+      bub.textContent = msgs[i][2];
+    } else {
+      clearInterval(interval);
+      setTimeout(() => showPage('pg-letter'), 800);
+    }
+  }, 1400);
+}
+
+/* =============================================
+   ENVELOPE / LETTER
+   ============================================= */
+let envOpen = false;
+function openEnv() {
+  if(envOpen) return; envOpen = true;
+  document.getElementById('env').classList.add('env-open');
+  document.getElementById('env-hint').textContent = '';
+  setTimeout(() => document.getElementById('lcard').classList.add('show'), 650);
+}
+
+/* =============================================
+   GALLERY
+   ============================================= */
+let slideIdx = 0, totalSlides = 0;
+function goGallery() { buildSlides(); showPage('pg-gallery'); }
+function buildSlides() {
+  const photos = (gData && gData.photos) || [];
+  const caps = (gData && gData.caps) || [];
+  const slidesEl = document.getElementById('slides');
+  const dotsEl = document.getElementById('dots');
+  slidesEl.innerHTML = ''; dotsEl.innerHTML = '';
+  totalSlides = photos.length || 3;
+  for(let i = 0; i < totalSlides; i++) {
+    const sl = document.createElement('div');
+    sl.className = 'slide' + (i === 0 ? ' active' : ''); sl.id = 'sl' + i;
+    const fr = document.createElement('div'); fr.className = 'photo-frame';
+    if(photos[i]) {
+      const img = document.createElement('img'); img.src = photos[i]; fr.appendChild(img);
+    } else {
+      const ph = document.createElement('div'); ph.className = 'photo-ph';
+      ph.innerHTML = catSVG('dance', 70) + '<span>Upload foto di admin</span>';
+      fr.appendChild(ph);
+    }
+    const badge = document.createElement('div'); badge.className = 'photo-badge';
+    badge.textContent = `${i+1} / ${totalSlides}`; fr.appendChild(badge);
+    const cap = document.createElement('div'); cap.className = 'photo-cap';
+    cap.textContent = caps[i] || `Momen ke-${i+1}`;
+    sl.appendChild(fr); sl.appendChild(cap); slidesEl.appendChild(sl);
+    const dot = document.createElement('div'); dot.className = 'dot' + (i === 0 ? ' on' : ''); dot.id = 'd'+i; dotsEl.appendChild(dot);
+  }
+  slideIdx = 0; updateNav();
+}
+function updateNav() {
+  document.getElementById('btn-p').disabled = slideIdx === 0;
+  document.getElementById('btn-n').disabled = slideIdx >= totalSlides - 1;
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i === slideIdx));
+  if(slideIdx === totalSlides - 1) document.getElementById('finish-btn').style.display = 'block';
+}
+function prevSlide() {
+  if(slideIdx <= 0) return;
+  document.getElementById('sl'+slideIdx).classList.remove('active'); slideIdx--;
+  const s = document.getElementById('sl'+slideIdx); s.classList.add('active'); s.style.animation='none'; s.offsetHeight; s.style.animation=''; updateNav();
+}
+function nextSlide() {
+  if(slideIdx >= totalSlides-1) return;
+  document.getElementById('sl'+slideIdx).classList.remove('active'); slideIdx++;
+  const s = document.getElementById('sl'+slideIdx); s.classList.add('active'); s.style.animation='none'; s.offsetHeight; s.style.animation=''; updateNav();
+}
+function goFinal() { confetti(80); showPage('pg-final'); }
+
+/* =============================================
+   AUDIO
+   ============================================= */
+let playing = false;
+function toggleAudio() {
+  const a = document.getElementById('aud');
+  if(!a.src || a.src === window.location.href) return;
+  if(playing) {
+    a.pause(); playing = false;
+    document.getElementById('play-b').textContent = '▶';
+    document.getElementById('eq').classList.add('off');
+  } else {
+    a.play().catch(()=>{});
+    playing = true;
+    document.getElementById('play-b').textContent = '⏸';
+    document.getElementById('eq').classList.remove('off');
+  }
+}
+
+/* =============================================
+   CONFETTI
+   ============================================= */
+const CC = ['#f9a8c9','#f5c842','#c084fc','#60a5fa','#86efac','#fb923c'];
+function confetti(n) {
+  for(let i=0;i<n;i++) {
+    setTimeout(()=>{
+      const el = document.createElement('div'); el.className = 'cf';
+      el.style.cssText = `left:${Math.random()*100}vw;width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;border-radius:${Math.random()>.4?'50%':'2px'};background:${CC[Math.floor(Math.random()*CC.length)]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.4}s`;
+      document.body.appendChild(el); setTimeout(()=>el.remove(), 4000);
+    }, i * 22);
+  }
+}
+
+/* =============================================
+   ADMIN
+   ============================================= */
+function onPhotosChange(input) {
+  const files = Array.from(input.files).slice(0,5);
+  const wrap = document.getElementById('cap-wrap');
+  const list = document.getElementById('cap-list');
+  list.innerHTML = '';
+  if(!files.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  files.forEach((_,i) => {
+    const inp = document.createElement('input');
+    inp.placeholder = `Keterangan foto ${i+1}...`;
+    inp.id = 'cap'+i;
+    inp.style.cssText = 'background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;font-size:.85rem;font-family:Nunito;color:#f9fafb;outline:none;width:100%';
+    list.appendChild(inp);
+  });
+}
+
+function readImage(file, maxW=800) {
+  return new Promise(res => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let w=img.width, h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg',.55));
+    };
+    img.src = url;
+  });
+}
+function readFile(file) {
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+
+async function generate() {
+  const btn = document.getElementById('gen-btn');
+  btn.textContent = 'Memproses...'; btn.disabled = true;
+  try {
+    const mFile = document.getElementById('a-music').files[0];
+    const pFiles = Array.from(document.getElementById('a-photos').files).slice(0,5);
+    let music = null, musicName = '';
+    if(mFile) { music = await readFile(mFile); musicName = mFile.name.replace(/\.[^.]+$/,''); }
+    const photos = pFiles.length ? await Promise.all(pFiles.map(f=>readImage(f))) : [];
+    const caps = pFiles.map((_,i)=>{ const el=document.getElementById('cap'+i); return el?el.value:''; });
+    const payload = {
+      name: document.getElementById('a-name').value || 'Seseorang Spesial',
+      tag: document.getElementById('a-tag').value,
+      lto: document.getElementById('a-lto').value,
+      lbody: document.getElementById('a-lbody').value,
+      sig: document.getElementById('a-sig').value,
+      final: document.getElementById('a-final').value,
+      cd: document.getElementById('a-cd').value,
+      photos, caps, music, musicName
+    };
+    const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const link = location.href.split('#')[0] + '#' + encoded;
+    document.getElementById('result-link').textContent = link;
+    document.getElementById('result-box').classList.add('show');
+    setTimeout(()=>document.getElementById('result-box').scrollIntoView({behavior:'smooth'}), 100);
+  } catch(e) {
+    alert('Gagal! Coba kurangi ukuran foto atau musik ya.');
+  }
+  btn.textContent = 'Generate Link Surprise'; btn.disabled = false;
+}
+
+function copyLink() {
+  const link = document.getElementById('result-link').textContent;
+  const ok = () => { const b=document.querySelector('.copy-btn'); b.textContent='Tersalin!'; setTimeout(()=>b.textContent='Salin Link',2200); };
+  if(navigator.clipboard) navigator.clipboard.writeText(link).then(ok).catch(()=>fallback(link,ok));
+  else fallback(link,ok);
+}
+function fallback(link,ok) {
+  const ta=document.createElement('textarea');ta.value=link;ta.style.cssText='position:fixed;opacity:0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');ok();}catch(e){alert('Salin manual:\n\n'+link);}
+  ta.remove();
+}
+</script>
+</body>
+</html>
