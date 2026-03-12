@@ -583,6 +583,7 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 .mbar-eq.paused span{animation-play-state:paused;height:3px!important}
 @keyframes eqA{from{transform:scaleY(.3)}to{transform:scaleY(1.2)}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 </head>
 <body>
 
@@ -630,11 +631,11 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
     </div>
   </div>
 
-  <!-- jsonblob info -->
+  <!-- LZ info -->
   <div class="adm-card">
-    <div class="adm-card-title">💾 Penyimpanan Data <span style="font-size:.6rem;color:#6b4055;font-weight:400;text-transform:none;letter-spacing:0">(link pendek, no login)</span></div>
+    <div class="adm-card-title">💾 Penyimpanan Data <span style="font-size:.6rem;color:#6b4055;font-weight:400;text-transform:none;letter-spacing:0">(compressed URL, no server)</span></div>
     <div style="font-size:.72rem;color:#d4a0b0;line-height:1.65;padding:2px 0 6px">
-      Pakai <strong style="color:var(--pk)">jsonblob.com</strong> — gratis, tanpa daftar, tanpa API key. Data disimpan otomatis saat generate 🎉
+      Data dicompress langsung di URL — <strong style="color:var(--pk)">zero server, zero signup</strong>. Foto tetap di ImgBB. Link otomatis pendek 🎉
     </div>
     <div id="jb-status" class="key-status"></div>
   </div>
@@ -835,31 +836,22 @@ const ANIM_PARTICLES = {
 /* ══════════════════════════════════════
    ROUTING
 ══════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('DOMContentLoaded', () => {
   const hash = location.hash.slice(1);
   if (hash) {
-    if (hash.startsWith('np:') || hash.startsWith('jb:')) {
-      // npoint or legacy jsonbin — short link
-      const npId = hash.slice(3);
-      showScreen('s-machine');
-      document.getElementById('machine-text').textContent = 'Memuat album...';
-      document.getElementById('machine-sub').textContent = 'Sabar ya ✨';
-      try {
-        gData = await loadFromNpoint(npId);
-        populateMachine(gData);
-      } catch(e) {
-        document.getElementById('machine-text').textContent = 'Gagal memuat :(';
-        document.getElementById('machine-sub').textContent = 'Coba minta link baru';
-      }
-    } else {
-      // Legacy base64 mode
-      try {
+    try {
+      if (hash.startsWith('lz:')) {
+        // LZ compressed
+        const decompressed = LZString.decompressFromEncodedURIComponent(hash.slice(3));
+        gData = JSON.parse(decompressed);
+      } else {
+        // Legacy base64
         gData = JSON.parse(decodeURIComponent(atob(hash)));
-        showScreen('s-machine');
-        populateMachine(gData);
-      } catch(e) {
-        showScreen('s-admin');
       }
+      showScreen('s-machine');
+      populateMachine(gData);
+    } catch(e) {
+      showScreen('s-admin');
     }
   } else {
     showScreen('s-admin');
@@ -1201,36 +1193,16 @@ function getBubbleData() {
 }
 
 /* ══════════════════════════════════════
-   JSONBLOB STORAGE (no login, no CORS)
+   LZ-STRING COMPRESS (no server needed)
 ══════════════════════════════════════ */
-async function saveToNpoint(payload) {
-  const res = await fetch('https://jsonblob.com/api/jsonBlob', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) throw new Error('Gagal simpan (' + res.status + ')');
-  // jsonblob returns the ID in the Location header: /api/jsonBlob/<id>
-  const location = res.headers.get('Location') || '';
-  const id = location.split('/').pop();
-  if (!id) throw new Error('ID tidak ditemukan di respons');
-  return id;
-}
-
-async function loadFromNpoint(blobId) {
-  const res = await fetch('https://jsonblob.com/api/jsonBlob/' + blobId, {
-    headers: { 'Accept': 'application/json' }
-  });
-  if (!res.ok) throw new Error('Data tidak ditemukan');
-  return await res.json();
-}
+// LZ-String via CDN (loaded in <head>)
 
 /* ══════════════════════════════════════
    GENERATE
 ══════════════════════════════════════ */
-async function generate() {
+function generate() {
   const btn = document.querySelector('.gen-btn');
-  btn.textContent = '⏳ Menyimpan...'; btn.disabled = true;
+  btn.textContent = '⏳ Memproses...'; btn.disabled = true;
 
   const st = document.getElementById('jb-status');
   st.textContent = ''; st.className = 'key-status';
@@ -1251,12 +1223,16 @@ async function generate() {
   const payload = { name, sub, end, items, music: musicData };
 
   try {
-    st.textContent = 'Menyimpan data...'; st.className = 'key-status';
-    const npId = await saveToNpoint(payload);
-    const link = location.href.split('#')[0] + '#np:' + npId;
+    const json = JSON.stringify(payload);
+    const compressed = LZString.compressToEncodedURIComponent(json);
+    const link = location.href.split('#')[0] + '#lz:' + compressed;
+    const sizeBefore = encodeURIComponent(json).length;
+    const sizeAfter = compressed.length;
+    const saved = Math.round((1 - sizeAfter/sizeBefore)*100);
+
     document.getElementById('result-link').textContent = link;
     document.getElementById('result-box').classList.add('on');
-    st.textContent = '✓ Tersimpan!'; st.className = 'key-status ok';
+    st.textContent = `✓ Dicompress ${saved}% lebih kecil!`; st.className = 'key-status ok';
     setTimeout(() => document.getElementById('result-box').scrollIntoView({ behavior:'smooth' }), 100);
   } catch(e) {
     st.textContent = '✗ ' + e.message; st.className = 'key-status err';
