@@ -20,6 +20,7 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 
 /* ════ SCREENS ════ */
 .screen{display:none;min-height:100vh;width:100%;flex-direction:column;align-items:center}
+#s-galaxy.on{position:fixed;inset:0;z-index:100;min-height:100vh}
 .screen.on{display:flex}
 
 /* ════ FLOATING CONFETTI BG ════ */
@@ -740,8 +741,8 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 </div>
 
 <!-- ══════════════ GALAXY ORBIT ══════════════ -->
-<section class="screen" id="s-galaxy">
-  <canvas id="galaxy-canvas"></canvas>
+<section class="screen" id="s-galaxy" style="position:relative;background:#000;overflow:hidden">
+  <canvas id="galaxy-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block"></canvas>
   <div style="position:absolute;top:28px;left:0;right:0;text-align:center;z-index:10;pointer-events:none">
     <div id="galaxy-name" style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(1rem,4vw,1.5rem);background:linear-gradient(135deg,#fff 0%,#f9a8c9 50%,#f5c842 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 14px rgba(249,168,201,.7));letter-spacing:.04em"></div>
     <div style="font-size:.6rem;color:rgba(249,168,201,.4);letter-spacing:.16em;text-transform:uppercase;margin-top:3px">tap foto untuk lihat ✦</div>
@@ -768,19 +769,19 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 
 <!-- ══════════════ MUSIC BAR ══════════════ -->
 <div id="music-bar">
+  <div style="font-size:1.1rem;flex-shrink:0">🎵</div>
   <div class="mbar-info">
-    <div class="mbar-title" id="mbar-title">🎵 Musik Spesial</div>
+    <div class="mbar-title" id="mbar-title">Musik Spesial</div>
     <div class="mbar-sub">untuk kamu 🎂</div>
   </div>
   <div class="mbar-eq" id="mbar-eq">
     <span></span><span></span><span></span><span></span>
   </div>
 </div>
-<!-- Hidden YT iframe player -->
-<div id="yt-player-wrap" style="position:fixed;bottom:56px;right:12px;z-index:599;display:none;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);width:200px;aspect-ratio:16/9">
-  <iframe id="yt-player" width="100%" height="100%" frameborder="0"
-    allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  <button onclick="toggleYTPanel()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
+<!-- Hidden YT iframe - background audio only -->
+<div style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;z-index:-1">
+  <iframe id="yt-player" width="1" height="1" frameborder="0"
+    allow="autoplay; encrypted-media"></iframe>
 </div>
 
 <script>
@@ -912,11 +913,14 @@ function closeValidate() {
    PRINTING ANIMATION → then show album
 ══════════════════════════════════════ */
 function startPrinting() {
+  // Start music immediately on user interaction (needed for autoplay policy)
+  if (gData && gData.music && gData.music.ytId) {
+    startYTMusic(gData.music.ytId);
+  }
   const overlay = document.getElementById('printing-overlay');
   overlay.classList.add('on');
   setTimeout(() => {
     overlay.classList.remove('on');
-    // Go to galaxy orbit screen first, then album
     showScreen('s-galaxy');
     confetti(20);
     initGalaxy(gData);
@@ -1299,357 +1303,500 @@ function previewYT() {
 /* ══════════════════════════════════════
    YOUTUBE PLAYER
 ══════════════════════════════════════ */
-let ytPanelOpen = false;
 function startYTMusic(ytId) {
   if (!ytId) return;
-  const wrap = document.getElementById('yt-player-wrap');
   const iframe = document.getElementById('yt-player');
-  // autoplay=1, loop=1, playlist=ID needed for loop
-  iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&controls=1&rel=0`;
+  iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&mute=0&controls=0&rel=0&enablejsapi=1`;
   document.getElementById('music-bar').classList.add('on');
-  wrap.style.display = 'block';
-  ytPanelOpen = true;
   musicPlaying = true;
 }
-function toggleYTPanel() {
-  const wrap = document.getElementById('yt-player-wrap');
-  ytPanelOpen = !ytPanelOpen;
-  wrap.style.display = ytPanelOpen ? 'block' : 'none';
-}
 function toggleMusic() {
-  toggleYTPanel();
+  // no-op, music runs in background
 }
 
 /* ══════════════════════════════════════
-   GALAXY ORBIT ENGINE
+   GALAXY ORBIT ENGINE (Three.js)
 ══════════════════════════════════════ */
 let galaxyRAF = null;
-let galaxyPhotos = []; // loaded Image objects with meta
-let orbitPlanets = [];
-let galaxyStars = [];
-let galaxyNebulas = [];
-let canvasW = 0, canvasH = 0;
-let cx = 0, cy = 0;
-
-const ORBIT_COLORS = [
-  'rgba(249,168,201,', // pink
-  'rgba(245,200,66,',  // gold
-  'rgba(168,240,216,', // mint
-  'rgba(212,180,248,', // lavender
-  'rgba(147,197,253,', // blue
-  'rgba(253,186,116,', // peach
-];
+let threeRenderer = null;
+let threeScene = null;
 
 function initGalaxy(d) {
   document.getElementById('galaxy-name').textContent = `untuk ${d.name || 'kamu'}`;
-
   const canvas = document.getElementById('galaxy-canvas');
-  const ctx = canvas.getContext('2d');
 
-  // Resize canvas
-  function resize() {
-    canvasW = canvas.width  = window.innerWidth;
-    canvasH = canvas.height = window.innerHeight;
-    cx = canvasW / 2;
-    cy = canvasH / 2;
+  // Force full screen canvas
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:1';
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  if (window.THREE) {
+    initThreeGalaxy(d, canvas);
+  } else {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+    s.onload = () => initThreeGalaxy(d, canvas);
+    document.head.appendChild(s);
   }
-  resize();
-  window.addEventListener('resize', () => { resize(); buildOrbits(); });
+}
 
-  // Build stars
-  galaxyStars = [];
-  for (let i = 0; i < 280; i++) {
-    galaxyStars.push({
-      x: Math.random() * canvasW,
-      y: Math.random() * canvasH,
-      r: Math.random() * 1.4 + 0.2,
-      alpha: Math.random() * 0.7 + 0.15,
-      twinkleSpeed: Math.random() * 0.02 + 0.005,
-      twinkleOffset: Math.random() * Math.PI * 2,
-      color: Math.random() > 0.85 ? '#f9a8c9' : Math.random() > 0.7 ? '#f5c842' : '#ffffff',
+function initThreeGalaxy(d, canvas) {
+  const THREE = window.THREE;
+  if (threeScene) {
+    // cleanup previous
+    threeScene.traverse(obj => {
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) { if (Array.isArray(obj.material)) obj.material.forEach(m=>m.dispose()); else obj.material.dispose(); }
     });
+    threeScene = null;
   }
 
-  // Nebula blobs
-  galaxyNebulas = [
-    { x: canvasW * 0.2, y: canvasH * 0.3, r: canvasW * 0.3, color: 'rgba(249,168,201,0.035)' },
-    { x: canvasW * 0.8, y: canvasH * 0.7, r: canvasW * 0.28, color: 'rgba(212,180,248,0.03)' },
-    { x: canvasW * 0.5, y: canvasH * 0.5, r: canvasW * 0.35, color: 'rgba(168,240,216,0.025)' },
-    { x: canvasW * 0.15, y: canvasH * 0.8, r: canvasW * 0.22, color: 'rgba(245,200,66,0.02)' },
-  ];
-
-  // Load photo images
   const photoItems = (d.items || []).filter(it => it.type === 'photo');
-  galaxyPhotos = [];
-  let loaded = 0;
 
-  if (photoItems.length === 0) {
-    buildOrbits();
-    startGalaxyLoop(ctx);
-    return;
+  // ── SCENE ──
+  const scene = new THREE.Scene();
+  threeScene = scene;
+  scene.fog = new THREE.FogExp2(0x000000, 0.0015);
+
+  const W = canvas.width, H = canvas.height;
+  const camera = new THREE.PerspectiveCamera(75, W/H, 0.1, 100000);
+  camera.position.set(0, 20, 30);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  threeRenderer = renderer;
+
+  window.addEventListener('resize', () => {
+    const nw = window.innerWidth, nh = window.innerHeight;
+    canvas.width = nw; canvas.height = nh;
+    camera.aspect = nw / nh;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nw, nh);
+  });
+
+  // ── GLOW SPRITE HELPER ──
+  function createGlowSprite(color, size, opacity) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+    g.addColorStop(0, color); g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,size,size);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(c),
+      transparent:true, opacity, depthWrite:false,
+      blending: THREE.AdditiveBlending
+    }));
+    return sp;
   }
 
-  photoItems.forEach((item, i) => {
+  // Central glow
+  const centralGlow = createGlowSprite('rgba(255,220,240,0.9)', 156, 0.3);
+  centralGlow.scale.set(10,10,1); scene.add(centralGlow);
+
+  // Colorful nebulas
+  const nebulaHues = [320,260,180,45,210,30,160];
+  nebulaHues.forEach(h => {
+    const nb = createGlowSprite(`hsla(${h},80%,55%,0.6)`, 256, 0.55);
+    nb.scale.set(90+Math.random()*60, 90+Math.random()*60, 1);
+    nb.position.set((Math.random()-.5)*160, (Math.random()-.5)*60, (Math.random()-.5)*160);
+    scene.add(nb);
+  });
+
+  // ── GALAXY PARTICLES (ShaderMaterial) ──
+  const gpCount = 100000;
+  const gpPos = new Float32Array(gpCount * 3);
+  const gpCol = new Float32Array(gpCount * 3);
+  let pi = 0;
+  const cIn = new THREE.Color(0xd63ed6), cOut = new THREE.Color(0x48b8b8);
+
+  for (let i = 0; i < gpCount; i++) {
+    const r = Math.pow(Math.random(), 20) * 100;
+    const branch = (i % 6) / 6 * Math.PI * 2;
+    const spin = r * 0.5;
+    const ang = branch + spin;
+    const rx=(Math.random()-.5)*0.2*r, ry=(Math.random()-.5)*0.2*r*1.2, rz=(Math.random()-.5)*0.2*r;
+    if (r < 30 && Math.random() < 0.8) continue;
+    gpPos[pi*3]   = Math.cos(ang)*r + rx;
+    gpPos[pi*3+1] = ry;
+    gpPos[pi*3+2] = Math.sin(ang)*r + rz;
+    const mc = cIn.clone().lerp(cOut, r/100);
+    mc.multiplyScalar(0.7+0.3*Math.random());
+    gpCol[pi*3]=mc.r; gpCol[pi*3+1]=mc.g; gpCol[pi*3+2]=mc.b;
+    pi++;
+  }
+  const gpGeo = new THREE.BufferGeometry();
+  gpGeo.setAttribute('position', new THREE.BufferAttribute(gpPos.slice(0,pi*3),3));
+  gpGeo.setAttribute('color',    new THREE.BufferAttribute(gpCol.slice(0,pi*3),3));
+
+  const gpMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime:       { value: 0 },
+      uSize:       { value: 50 * renderer.getPixelRatio() },
+      uRippleTime: { value: -1 },
+      uRippleSpeed:{ value: 40 },
+      uRippleWidth:{ value: 20 },
+    },
+    vertexShader: `
+      uniform float uSize, uTime, uRippleTime, uRippleSpeed, uRippleWidth;
+      attribute vec3 color; varying vec3 vColor;
+      void main() {
+        vColor = color;
+        vec4 mp = modelMatrix * vec4(position, 1.0);
+        if (uRippleTime > 0.0) {
+          float rr = (uTime - uRippleTime) * uRippleSpeed;
+          float pd = length(mp.xyz);
+          float s = 1.0 - smoothstep(rr-uRippleWidth, rr+uRippleWidth, pd);
+          s *= smoothstep(rr+uRippleWidth, rr-uRippleWidth, pd);
+          if (s > 0.0) vColor += vec3(s*2.0);
+        }
+        vec4 vp = viewMatrix * mp;
+        gl_Position = projectionMatrix * vp;
+        gl_PointSize = uSize / -vp.z;
+      }`,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        float d = length(gl_PointCoord - vec2(0.5));
+        if (d > 0.5) discard;
+        gl_FragColor = vec4(vColor, 1.0);
+      }`,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false, transparent: true, vertexColors: true
+  });
+  scene.add(new THREE.Points(gpGeo, gpMat));
+
+  // ── STAR FIELD ──
+  const sPosArr = new Float32Array(20000*3);
+  for(let i=0;i<20000;i++){sPosArr[i*3]=(Math.random()-.5)*900;sPosArr[i*3+1]=(Math.random()-.5)*900;sPosArr[i*3+2]=(Math.random()-.5)*900;}
+  const sGeo = new THREE.BufferGeometry();
+  sGeo.setAttribute('position', new THREE.BufferAttribute(sPosArr,3));
+  scene.add(new THREE.Points(sGeo, new THREE.PointsMaterial({color:0xffffff,size:0.7,transparent:true,opacity:0.7,depthWrite:false})));
+
+  // ── PLANET (Storm Shader) ──
+  function createPlanetTexture() {
+    const pc = document.createElement('canvas'); pc.width=pc.height=512;
+    const pctx = pc.getContext('2d');
+    const pg = pctx.createRadialGradient(256,256,64,256,256,256);
+    pg.addColorStop(0.00,'#f8bbd0'); pg.addColorStop(0.12,'#f48fb1');
+    pg.addColorStop(0.22,'#f06292'); pg.addColorStop(0.35,'#ffffff');
+    pg.addColorStop(0.50,'#e1aaff'); pg.addColorStop(0.62,'#a259f7');
+    pg.addColorStop(0.75,'#b2ff59'); pg.addColorStop(1.00,'#3fd8c7');
+    pctx.fillStyle=pg; pctx.fillRect(0,0,512,512);
+    const spots=['#f8bbd0','#f48fb1','#f06292','#ffffff','#e1aaff','#a259f7','#b2ff59'];
+    for(let i=0;i<40;i++){
+      const x=Math.random()*512,y=Math.random()*512,r=30+Math.random()*120;
+      const col=spots[i%spots.length];
+      const sg=pctx.createRadialGradient(x,y,0,x,y,r);
+      sg.addColorStop(0,col+'cc'); sg.addColorStop(1,col+'00');
+      pctx.fillStyle=sg; pctx.fillRect(0,0,512,512);
+    }
+    return new THREE.CanvasTexture(pc);
+  }
+
+  const planetRadius = 10;
+  const planet = new THREE.Mesh(
+    new THREE.SphereGeometry(planetRadius, 48, 48),
+    new THREE.ShaderMaterial({
+      uniforms: { time:{value:0}, baseTexture:{value:createPlanetTexture()} },
+      vertexShader:`varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+      fragmentShader:`
+        uniform float time; uniform sampler2D baseTexture; varying vec2 vUv;
+        void main(){
+          vec2 uv=vUv;
+          float angle=length(uv-vec2(0.5))*3.0;
+          float twist=sin(angle*3.0+time)*0.1;
+          uv.x+=twist*sin(time*0.5); uv.y+=twist*cos(time*0.5);
+          vec4 tc=texture2D(baseTexture,uv);
+          float noise=sin(uv.x*10.0+time)*sin(uv.y*10.0+time)*0.1;
+          tc.rgb+=noise*vec3(0.8,0.4,0.2);
+          gl_FragColor=tc;
+        }`
+    })
+  );
+  scene.add(planet);
+
+  // Planet atmosphere glow
+  const atm = new THREE.Mesh(
+    new THREE.SphereGeometry(planetRadius*1.08,48,48),
+    new THREE.ShaderMaterial({
+      uniforms:{glowColor:{value:new THREE.Color(0xe0b3ff)}},
+      vertexShader:`varying vec3 vN; void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+      fragmentShader:`varying vec3 vN; uniform vec3 glowColor; void main(){float i=pow(0.7-dot(vN,vec3(0,0,1)),2.0);gl_FragColor=vec4(glowColor,1.0)*i;}`,
+      side:THREE.BackSide, blending:THREE.AdditiveBlending, transparent:true
+    })
+  );
+  scene.add(atm);
+
+  // ── TEXT RINGS ──
+  const ringTexts = [
+    `Happy Birthday, ${d.name||'kamu'}! 🎂`,
+    d.sub || '✦ momen spesial untukmu ✦',
+    '🎉 dengan sepenuh hati 🎉',
+    d.end || '✨ semoga bahagia selalu ✨',
+  ];
+  ringTexts.forEach((text, i) => {
+    const textureH = 140;
+    const fontSize = 100;
+    const rCanvas = document.createElement('canvas');
+    const rCtx = rCanvas.getContext('2d');
+    rCtx.font = `bold ${fontSize}px Arial,sans-serif`;
+    const seg = text + '     ';
+    const sw = rCtx.measureText(seg).width;
+    const ringR = planetRadius * 1.15 + i * 5.5;
+    const circ = 2 * Math.PI * ringR * 200;
+    const rep = Math.max(1, Math.ceil(circ / sw));
+    let full = ''; for(let j=0;j<rep;j++) full+=seg;
+    rCanvas.width = Math.ceil(sw * rep);
+    rCanvas.height = textureH;
+    rCtx.font = `bold ${fontSize}px Arial,sans-serif`;
+    rCtx.shadowColor='#e0b3ff'; rCtx.shadowBlur=18;
+    rCtx.strokeStyle='#fff'; rCtx.lineWidth=6;
+    rCtx.strokeText(full,0,textureH*0.82);
+    rCtx.shadowColor='#ffb3de'; rCtx.shadowBlur=24;
+    rCtx.fillStyle='#fff'; rCtx.fillText(full,0,textureH*0.84);
+
+    const rTex = new THREE.CanvasTexture(rCanvas);
+    rTex.wrapS = THREE.RepeatWrapping;
+    rTex.repeat.x = (sw * rep) / circ;
+    rTex.needsUpdate = true;
+
+    const mesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(ringR,ringR,1.2,128,1,true),
+      new THREE.MeshBasicMaterial({map:rTex,transparent:true,side:THREE.DoubleSide,depthWrite:false,alphaTest:0.01})
+    );
+    mesh.rotation.x = i * (Math.PI / 3.5);
+    mesh.userData.ringSpeed = 0.003 + i * 0.001;
+    mesh.userData.isRing = true;
+    mesh.userData.ringIdx = i;
+    scene.add(mesh);
+  });
+
+  // ── PHOTO CLUSTERS ──
+  // Each photo becomes a cluster of points textured with that photo
+  // distributed along a galaxy arm
+  function createNeonTexture(img, size) {
+    const tc = document.createElement('canvas'); tc.width=tc.height=size;
+    const tctx = tc.getContext('2d');
+    const ar = img.width/img.height;
+    let dw,dh,ox,oy;
+    if(ar>1){dw=size;dh=size/ar;ox=0;oy=(size-dh)/2;}
+    else{dh=size;dw=size*ar;ox=(size-dw)/2;oy=0;}
+    const cr=size*0.1;
+    tctx.save(); tctx.beginPath();
+    tctx.moveTo(ox+cr,oy); tctx.lineTo(ox+dw-cr,oy);
+    tctx.arcTo(ox+dw,oy,ox+dw,oy+cr,cr); tctx.lineTo(ox+dw,oy+dh-cr);
+    tctx.arcTo(ox+dw,oy+dh,ox+dw-cr,oy+dh,cr); tctx.lineTo(ox+cr,oy+dh);
+    tctx.arcTo(ox,oy+dh,ox,oy+dh-cr,cr); tctx.lineTo(ox,oy+cr);
+    tctx.arcTo(ox,oy,ox+cr,oy,cr); tctx.closePath(); tctx.clip();
+    tctx.drawImage(img,ox,oy,dw,dh); tctx.restore();
+    return new THREE.CanvasTexture(tc);
+  }
+
+  const n = photoItems.length;
+  const clusterGroups = [];
+
+  // Scale points per photo based on photo count (like original)
+  const maxDensity=4000, minDensity=800, maxGroups=14;
+  let ppg;
+  if(n<=1) ppg=maxDensity;
+  else if(n>=maxGroups) ppg=minDensity;
+  else { const t=(n-1)/(maxGroups-1); ppg=Math.floor(maxDensity*(1-t)+minDensity*t); }
+
+  photoItems.forEach((item, gi) => {
+    const groupPos = new Float32Array(ppg * 3);
+    const groupColNear = new Float32Array(ppg * 3);
+    const groupColFar  = new Float32Array(ppg * 3);
+    let vc = 0;
+
+    for(let i=0;i<ppg;i++){
+      const r = Math.pow(Math.random(),20)*100;
+      if(r<30) continue;
+      const globalIdx = gi*ppg+i;
+      const branch=(globalIdx%6)/6*Math.PI*2;
+      const ang=branch+r*0.5;
+      const rx=(Math.random()-.5)*0.2*r;
+      const ry=(Math.random()-.5)*0.2*r*0.5;
+      const rz=(Math.random()-.5)*0.2*r;
+      groupPos[vc*3]=Math.cos(ang)*r+rx;
+      groupPos[vc*3+1]=ry;
+      groupPos[vc*3+2]=Math.sin(ang)*r+rz;
+      groupColNear[vc*3]=1;groupColNear[vc*3+1]=1;groupColNear[vc*3+2]=1;
+      const fc=cIn.clone().lerp(cOut,r/100); fc.multiplyScalar(0.7+0.3*Math.random());
+      groupColFar[vc*3]=fc.r;groupColFar[vc*3+1]=fc.g;groupColFar[vc*3+2]=fc.b;
+      vc++;
+    }
+    if(!vc) return;
+
+    const geoNear = new THREE.BufferGeometry();
+    const geoFar  = new THREE.BufferGeometry();
+    geoNear.setAttribute('position', new THREE.BufferAttribute(groupPos.slice(0,vc*3),3));
+    geoNear.setAttribute('color',    new THREE.BufferAttribute(groupColNear.slice(0,vc*3),3));
+    geoFar.setAttribute('position',  new THREE.BufferAttribute(groupPos.slice(0,vc*3),3));
+    geoFar.setAttribute('color',     new THREE.BufferAttribute(groupColFar.slice(0,vc*3),3));
+
+    // center the geometry
+    const posA = geoFar.getAttribute('position');
+    let cx=0,cy=0,cz=0;
+    for(let k=0;k<posA.count;k++){cx+=posA.getX(k);cy+=posA.getY(k);cz+=posA.getZ(k);}
+    cx/=posA.count;cy/=posA.count;cz/=posA.count;
+    geoNear.translate(-cx,-cy,-cz); geoFar.translate(-cx,-cy,-cz);
+
+    // Load img and create neon texture
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    img.crossOrigin='anonymous';
     img.onload = () => {
-      galaxyPhotos.push({ img, url: item.url, cap: item.cap || '', idx: i });
-      loaded++;
-      if (loaded === photoItems.length) {
-        buildOrbits();
-        startGalaxyLoop(ctx);
-      }
+      const neonTex = createNeonTexture(img, 256);
+      const matNear = new THREE.PointsMaterial({size:1.8,map:neonTex,transparent:false,alphaTest:0.2,depthWrite:true,depthTest:true,blending:THREE.NormalBlending,vertexColors:true});
+      const matFar  = new THREE.PointsMaterial({size:1.8,map:neonTex,transparent:true,alphaTest:0.2,depthWrite:false,blending:THREE.AdditiveBlending,vertexColors:true});
+      const pts = new THREE.Points(geoFar, matFar);
+      pts.position.set(cx,cy,cz);
+      pts.userData = { matNear, geoNear, matFar, geoFar, photoUrl:item.url, photoCap:item.cap||'' };
+      scene.add(pts);
+      clusterGroups.push(pts);
     };
     img.onerror = () => {
-      loaded++;
-      if (loaded === photoItems.length) {
-        buildOrbits();
-        startGalaxyLoop(ctx);
-      }
+      // fallback: plain colored cluster
+      const matFar = new THREE.PointsMaterial({size:0.8,vertexColors:true,transparent:true,opacity:0.7,depthWrite:false,blending:THREE.AdditiveBlending});
+      const pts = new THREE.Points(geoFar, matFar);
+      pts.position.set(cx,cy,cz);
+      pts.userData = { matFar, geoFar, photoUrl:item.url, photoCap:item.cap||'' };
+      scene.add(pts); clusterGroups.push(pts);
     };
     img.src = item.url;
   });
 
-  // Touch/click on canvas to tap planets
-  canvas.addEventListener('click', onGalaxyTap);
-  canvas.addEventListener('touchend', e => {
+  // ── SHOOTING STARS ──
+  const shooters = [];
+  function spawnShooter() {
+    const tl=80, sp=new Float32Array(tl*3);
+    const ox=-180+Math.random()*80, oy=-80+Math.random()*160, oz=-80+Math.random()*160;
+    const dx=220+Math.random()*80, dy=-20+Math.random()*40, dz=-40+Math.random()*80;
+    for(let i=0;i<tl;i++){const t=i/(tl-1);sp[i*3]=ox+dx*t;sp[i*3+1]=oy+dy*t;sp[i*3+2]=oz+dz*t;}
+    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(sp,3));
+    const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0x99eeff,transparent:true,opacity:0.85}));
+    line.userData={progress:0,speed:0.008+Math.random()*0.008};
+    scene.add(line); shooters.push(line);
+  }
+
+  // ── CAMERA INTRO animation ──
+  // Camera starts at top-down view and swoops to side orbital
+  let introProgress = 0;
+  const introStart = new THREE.Vector3(0, 60, 10);
+  const introEnd   = new THREE.Vector3(-40, 80, 80);
+  camera.position.copy(introStart);
+
+  let camAngle = Math.atan2(introEnd.x, introEnd.z);
+  const CAM_RADIUS = 90;
+  const CAM_Y = 80;
+  let introComplete = false;
+
+  // ── RIPPLE on click ──
+  let rippleFired = false;
+  function fireRipple() {
+    if(rippleFired) return;
+    rippleFired = true;
+    gpMat.uniforms.uRippleTime.value = gpMat.uniforms.uTime.value;
+  }
+
+  // ── TAP detection ──
+  const raycaster = new THREE.Raycaster();
+  raycaster.params.Points = { threshold: 4 };
+  canvas.addEventListener('click', e => {
+    if(document.getElementById('galaxy-lightbox').style.display==='flex') return;
+    fireRipple();
+    const rect=canvas.getBoundingClientRect();
+    const mouse=new THREE.Vector2(
+      ((e.clientX-rect.left)/rect.width)*2-1,
+      -((e.clientY-rect.top)/rect.height)*2+1
+    );
+    raycaster.setFromCamera(mouse,camera);
+    const hits=raycaster.intersectObjects(clusterGroups);
+    if(hits.length){ openLightbox(hits[0].object.userData.photoUrl,hits[0].object.userData.photoCap); }
+  });
+  canvas.addEventListener('touchend', e=>{
     e.preventDefault();
-    const t = e.changedTouches[0];
-    onGalaxyTap({ clientX: t.clientX, clientY: t.clientY });
-  }, { passive: false });
-}
+    const t=e.changedTouches[0];
+    canvas.dispatchEvent(new MouseEvent('click',{clientX:t.clientX,clientY:t.clientY}));
+  },{passive:false});
 
-function buildOrbits() {
-  orbitPlanets = [];
-  const n = galaxyPhotos.length;
-  if (n === 0) return;
-
-  const minDim = Math.min(canvasW, canvasH);
-
-  // Distribute photos across multiple orbits
-  // Up to 3 photos per orbit ring, rest on outer rings
-  const ORBITS = [];
-  const ORBIT_RADII_BASE = [0.18, 0.29, 0.40, 0.50, 0.60];
-  let orbitIdx = 0;
-  let countInOrbit = 0;
-  const maxPerOrbit = [3, 4, 5, 6, 7];
-
-  galaxyPhotos.forEach((ph, i) => {
-    if (orbitIdx >= ORBIT_RADII_BASE.length) orbitIdx = ORBIT_RADII_BASE.length - 1;
-    if (!ORBITS[orbitIdx]) ORBITS[orbitIdx] = [];
-    ORBITS[orbitIdx].push(ph);
-    countInOrbit++;
-    if (countInOrbit >= (maxPerOrbit[orbitIdx] || 5)) {
-      orbitIdx++;
-      countInOrbit = 0;
-    }
-  });
-
-  ORBITS.forEach((photosInOrbit, oi) => {
-    const radius = ORBIT_RADII_BASE[oi] * minDim;
-    const col = ORBIT_COLORS[oi % ORBIT_COLORS.length];
-    const speed = (0.00018 + oi * 0.00004) * (oi % 2 === 0 ? 1 : -1); // alternating direction
-    const photoSize = Math.max(28, Math.min(52, minDim * 0.072 - oi * 3));
-
-    photosInOrbit.forEach((ph, pi) => {
-      const angleOffset = (2 * Math.PI / photosInOrbit.length) * pi;
-      orbitPlanets.push({
-        ph,
-        orbitRadius: radius,
-        orbitSpeed: speed,
-        angle: angleOffset,
-        size: photoSize,
-        color: col,
-        glowPhase: Math.random() * Math.PI * 2,
-        glowSpeed: 0.03 + Math.random() * 0.02,
-        orbitIdx: oi,
-      });
-    });
-  });
-}
-
-let galaxyT = 0;
-function startGalaxyLoop(ctx) {
-  if (galaxyRAF) cancelAnimationFrame(galaxyRAF);
+  // ── ANIMATE LOOP ──
+  let clock = 0;
   function loop() {
-    galaxyT++;
-    drawGalaxy(ctx);
     galaxyRAF = requestAnimationFrame(loop);
+    clock += 0.008;
+    const time = clock;
+
+    // Update shader time + ripple
+    gpMat.uniforms.uTime.value = time;
+
+    // Camera: swoop in then slowly orbit
+    if(!introComplete) {
+      introProgress = Math.min(1, introProgress + 0.006);
+      const t = 0.5 - 0.5*Math.cos(Math.PI*introProgress); // ease
+      camera.position.lerpVectors(introStart, introEnd, t);
+      if(introProgress >= 1) introComplete = true;
+    } else {
+      camAngle += 0.003;
+      camera.position.x = Math.cos(camAngle) * CAM_RADIUS;
+      camera.position.z = Math.sin(camAngle) * CAM_RADIUS;
+      camera.position.y = CAM_Y + Math.sin(camAngle*0.5)*20;
+    }
+    camera.lookAt(0,0,0);
+
+    // Planet
+    planet.material.uniforms.time.value = time * 0.5;
+    planet.lookAt(camera.position);
+
+    // Text rings
+    scene.traverse(obj => {
+      if(!obj.userData.isRing) return;
+      obj.rotation.y += obj.userData.ringSpeed;
+      // Pulsing opacity
+      const pulse=(Math.sin(time*1.5+obj.userData.ringIdx)+1)/2;
+      if(obj.material) obj.material.opacity = 0.7+pulse*0.3;
+    });
+
+    // Near/far material swap for clusters
+    clusterGroups.forEach(pts => {
+      if(!pts.userData.matNear) return;
+      const dist = camera.position.distanceTo(pts.position);
+      if(dist < 12) {
+        if(pts.material !== pts.userData.matNear){pts.material=pts.userData.matNear;pts.geometry=pts.userData.geoNear;}
+      } else {
+        if(pts.material !== pts.userData.matFar){pts.material=pts.userData.matFar;pts.geometry=pts.userData.geoFar;}
+      }
+    });
+
+    // Shooters
+    for(let i=shooters.length-1;i>=0;i--){
+      const s=shooters[i];
+      s.userData.progress+=s.userData.speed;
+      s.material.opacity=Math.max(0,Math.min(1,(1-s.userData.progress)*4));
+      if(s.userData.progress>1){scene.remove(s);shooters.splice(i,1);}
+    }
+    if(shooters.length<3&&Math.random()<0.02) spawnShooter();
+
+    renderer.render(scene, camera);
   }
   loop();
 }
 
 function stopGalaxy() {
-  if (galaxyRAF) { cancelAnimationFrame(galaxyRAF); galaxyRAF = null; }
-}
-
-function drawGalaxy(ctx) {
-  ctx.clearRect(0, 0, canvasW, canvasH);
-
-  // Deep space gradient bg
-  const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(canvasW, canvasH) * 0.8);
-  bgGrad.addColorStop(0, '#0d0010');
-  bgGrad.addColorStop(0.4, '#080008');
-  bgGrad.addColorStop(1, '#000000');
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, canvasW, canvasH);
-
-  // Nebula blobs
-  galaxyNebulas.forEach(nb => {
-    const grad = ctx.createRadialGradient(nb.x, nb.y, 0, nb.x, nb.y, nb.r);
-    grad.addColorStop(0, nb.color);
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(nb.x, nb.y, nb.r, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  // Stars with twinkling
-  galaxyStars.forEach(s => {
-    const alpha = s.alpha * (0.5 + 0.5 * Math.sin(galaxyT * s.twinkleSpeed + s.twinkleOffset));
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = s.color.replace(')', `,${alpha})`).replace('#ffffff', `rgba(255,255,255,${alpha})`).replace('#f9a8c9', `rgba(249,168,201,${alpha})`).replace('#f5c842', `rgba(245,200,66,${alpha})`);
-    ctx.fill();
-  });
-
-  // Central glow (sun/core)
-  const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
-  coreGlow.addColorStop(0, 'rgba(255,220,240,0.9)');
-  coreGlow.addColorStop(0.15, 'rgba(249,168,201,0.6)');
-  coreGlow.addColorStop(0.4, 'rgba(232,121,160,0.2)');
-  coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = coreGlow;
-  ctx.beginPath(); ctx.arc(cx, cy, 60, 0, Math.PI * 2); ctx.fill();
-
-  // Core dot
-  ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2);
-  ctx.fillStyle = '#fff8fc';
-  ctx.shadowColor = '#f9a8c9'; ctx.shadowBlur = 20;
-  ctx.fill(); ctx.shadowBlur = 0;
-
-  // Birthday emoji on core
-  ctx.font = '18px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🎂', cx, cy);
-
-  // Draw orbit rings
-  const drawnOrbits = new Set();
-  orbitPlanets.forEach(planet => {
-    if (!drawnOrbits.has(planet.orbitIdx)) {
-      drawnOrbits.add(planet.orbitIdx);
-      ctx.beginPath();
-      ctx.arc(cx, cy, planet.orbitRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = planet.color + '0.12)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 8]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-  });
-
-  // Update & draw planets
-  orbitPlanets.forEach(planet => {
-    planet.angle += planet.orbitSpeed;
-    const px = cx + Math.cos(planet.angle) * planet.orbitRadius;
-    const py = cy + Math.sin(planet.angle) * planet.orbitRadius;
-    planet._x = px; planet._y = py; // store for tap detection
-
-    const glowAlpha = 0.4 + 0.3 * Math.sin(galaxyT * planet.glowSpeed + planet.glowPhase);
-    const sz = planet.size;
-
-    // Outer glow ring
-    const glowGrad = ctx.createRadialGradient(px, py, sz * 0.5, px, py, sz * 1.4);
-    glowGrad.addColorStop(0, planet.color + glowAlpha + ')');
-    glowGrad.addColorStop(1, planet.color + '0)');
-    ctx.fillStyle = glowGrad;
-    ctx.beginPath(); ctx.arc(px, py, sz * 1.4, 0, Math.PI * 2); ctx.fill();
-
-    // Clip & draw photo
-    ctx.save();
-    ctx.beginPath(); ctx.arc(px, py, sz, 0, Math.PI * 2); ctx.clip();
-
-    if (planet.ph.img && planet.ph.img.complete && planet.ph.img.naturalWidth > 0) {
-      // Draw image centered & square-cropped
-      const iw = planet.ph.img.naturalWidth, ih = planet.ph.img.naturalHeight;
-      const scale = (sz * 2) / Math.min(iw, ih);
-      const dw = iw * scale, dh = ih * scale;
-      ctx.drawImage(planet.ph.img, px - dw/2, py - dh/2, dw, dh);
-    } else {
-      // Fallback colored circle
-      ctx.fillStyle = planet.color + '0.6)';
-      ctx.fillRect(px - sz, py - sz, sz * 2, sz * 2);
-    }
-    ctx.restore();
-
-    // Border ring
-    ctx.beginPath(); ctx.arc(px, py, sz, 0, Math.PI * 2);
-    ctx.strokeStyle = planet.color + (0.5 + glowAlpha * 0.5) + ')';
-    ctx.lineWidth = 1.8;
-    ctx.shadowColor = planet.color + '0.8)';
-    ctx.shadowBlur = 8;
-    ctx.stroke(); ctx.shadowBlur = 0;
-
-    // Tiny star trail dots along orbit
-    for (let t = 1; t <= 3; t++) {
-      const trailAngle = planet.angle - planet.orbitSpeed * t * 8;
-      const tx = cx + Math.cos(trailAngle) * planet.orbitRadius;
-      const ty = cy + Math.sin(trailAngle) * planet.orbitRadius;
-      const ta = (0.4 - t * 0.12) * Math.abs(planet.orbitSpeed) * 800;
-      ctx.beginPath(); ctx.arc(tx, ty, 1.2, 0, Math.PI * 2);
-      ctx.fillStyle = planet.color + Math.max(0, ta) + ')';
-      ctx.fill();
-    }
-  });
-
-  // Shooting star occasionally
-  if (galaxyT % 280 < 60) {
-    const progress = (galaxyT % 280) / 60;
-    const sx = canvasW * 0.1 + canvasW * 0.8 * progress;
-    const sy = canvasH * 0.15 - canvasH * 0.08 * progress;
-    ctx.beginPath();
-    ctx.moveTo(sx, sy);
-    ctx.lineTo(sx - 40 * progress, sy + 16 * progress);
-    const sg = ctx.createLinearGradient(sx - 40, sy + 16, sx, sy);
-    sg.addColorStop(0, 'rgba(255,255,255,0)');
-    sg.addColorStop(1, 'rgba(255,255,255,0.8)');
-    ctx.strokeStyle = sg;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-}
-
-function onGalaxyTap(e) {
-  // Check if lightbox is open
-  const lb = document.getElementById('galaxy-lightbox');
-  if (lb.style.display === 'flex') return;
-
-  const rect = document.getElementById('galaxy-canvas').getBoundingClientRect();
-  const tapX = e.clientX - rect.left;
-  const tapY = e.clientY - rect.top;
-
-  for (const planet of orbitPlanets) {
-    if (!planet._x) continue;
-    const dist = Math.hypot(tapX - planet._x, tapY - planet._y);
-    if (dist <= planet.size + 10) {
-      openLightbox(planet.ph.url, planet.ph.cap);
-      return;
-    }
-  }
+  if(galaxyRAF){ cancelAnimationFrame(galaxyRAF); galaxyRAF=null; }
+  if(threeRenderer){ threeRenderer.dispose(); threeRenderer=null; }
 }
 
 function openLightbox(url, cap) {
-  const lb = document.getElementById('galaxy-lightbox');
-  document.getElementById('galaxy-lb-img').src = url;
-  document.getElementById('galaxy-lb-cap').textContent = cap || '';
-  lb.style.display = 'flex';
-  lb.style.animation = 'fadeIn .3s ease both';
+  const lb=document.getElementById('galaxy-lightbox');
+  document.getElementById('galaxy-lb-img').src=url;
+  document.getElementById('galaxy-lb-cap').textContent=cap||'';
+  lb.style.display='flex';
 }
 
 function closeLightbox() {
-  document.getElementById('galaxy-lightbox').style.display = 'none';
+  document.getElementById('galaxy-lightbox').style.display='none';
 }
 
 function goToAlbumFromGalaxy() {
@@ -1657,11 +1804,8 @@ function goToAlbumFromGalaxy() {
   buildAlbum(gData);
   showScreen('s-album');
   confetti(30);
-  // start music
-  if (gData.music && gData.music.ytId) {
-    setTimeout(() => startYTMusic(gData.music.ytId), 600);
-  }
 }
+
 
 /* ══════════════════════════════════════
    CONFETTI
