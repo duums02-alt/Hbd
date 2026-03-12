@@ -667,27 +667,18 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
   <!-- Musik -->
   <div class="adm-card">
     <div class="adm-card-title">🎵 Musik Latar</div>
-    <div class="dropzone" id="music-dz"
-      ondragover="mdzOver(event)" ondragleave="mdzLeave(event)" ondrop="mdzDrop(event)"
-      style="min-height:80px">
-      <input type="file" id="music-input" accept="audio/*" onchange="onMusicChange(event)">
-      <div class="dz-icon" id="music-dz-icon">🎵</div>
-      <div class="dz-text" id="music-dz-text">Drag & drop file musik (MP3/OGG)<br><span style="font-size:.7rem;opacity:.55">atau tap untuk pilih • upload ke ImgBB</span></div>
-    </div>
-    <div id="music-progress" class="upload-progress" style="display:none">
-      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-      <span id="music-progress-text">Uploading musik...</span>
-    </div>
-    <div id="music-preview" style="display:none;margin-top:10px">
-      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.08)">
-        <span style="font-size:1.3rem">🎵</span>
-        <div style="flex:1;min-width:0">
-          <div id="music-filename" style="font-size:.78rem;color:#d4a0b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-          <div style="font-size:.65rem;color:#6b4055;margin-top:2px">Siap diputar di album ✓</div>
-        </div>
-        <button onclick="removeMusic()" style="width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,100,120,.15);color:var(--pk);cursor:pointer;font-size:.9rem;flex-shrink:0">×</button>
+    <div class="field">
+      <label>Link YouTube</label>
+      <div class="key-row">
+        <input id="yt-url" type="url" placeholder="https://youtube.com/watch?v=..." oninput="previewYT()">
+        <button class="key-test-btn" onclick="previewYT()">Preview</button>
       </div>
+      <small>Paste link YouTube biasa — otomatis jadi background music</small>
     </div>
+    <div id="yt-preview" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9">
+      <iframe id="yt-iframe" width="100%" height="100%" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen style="display:block"></iframe>
+    </div>
+    <div id="yt-status" class="key-status" style="margin-top:4px"></div>
   </div>
 
   <button class="gen-btn" onclick="generate()">🎉 Generate Link Album</button>
@@ -777,15 +768,19 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 
 <!-- ══════════════ MUSIC BAR ══════════════ -->
 <div id="music-bar">
-  <button class="mbar-play" id="mbar-play-btn" onclick="toggleMusic()">▶</button>
   <div class="mbar-info">
-    <div class="mbar-title" id="mbar-title">Lagu spesial</div>
+    <div class="mbar-title" id="mbar-title">🎵 Musik Spesial</div>
     <div class="mbar-sub">untuk kamu 🎂</div>
   </div>
-  <div class="mbar-eq paused" id="mbar-eq">
+  <div class="mbar-eq" id="mbar-eq">
     <span></span><span></span><span></span><span></span>
   </div>
-  <audio id="bg-audio" loop></audio>
+</div>
+<!-- Hidden YT iframe player -->
+<div id="yt-player-wrap" style="position:fixed;bottom:56px;right:12px;z-index:599;display:none;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);width:200px;aspect-ratio:16/9">
+  <iframe id="yt-player" width="100%" height="100%" frameborder="0"
+    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <button onclick="toggleYTPanel()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
 </div>
 
 <script>
@@ -1201,6 +1196,10 @@ function getBubbleData() {
    GENERATE
 ══════════════════════════════════════ */
 function generate() {
+  // ensure YT music captured
+  const ytUrl = document.getElementById('yt-url').value.trim();
+  if (ytUrl) previewYT();
+
   const btn = document.querySelector('.gen-btn');
   btn.textContent = '⏳ Memproses...'; btn.disabled = true;
 
@@ -1261,86 +1260,64 @@ function fallbackCopy(t, ok) {
 }
 
 /* ══════════════════════════════════════
-   MUSIC UPLOAD
+   YOUTUBE MUSIC
 ══════════════════════════════════════ */
-function mdzOver(e) { e.preventDefault(); document.getElementById('music-dz').classList.add('drag'); }
-function mdzLeave(e) { document.getElementById('music-dz').classList.remove('drag'); }
-function mdzDrop(e) {
-  e.preventDefault();
-  document.getElementById('music-dz').classList.remove('drag');
-  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
-  if (files[0]) processMusic(files[0]);
-}
-function onMusicChange(e) {
-  if (e.target.files[0]) processMusic(e.target.files[0]);
-  e.target.value = '';
-}
-
-async function processMusic(file) {
-  const key = document.getElementById('imgbb-key').value.trim();
-  if (!key) { alert('Masukkan ImgBB API key dulu!'); return; }
-
-  const prog = document.getElementById('music-progress');
-  const progText = document.getElementById('music-progress-text');
-  prog.style.display = 'flex';
-  progText.textContent = `Uploading: ${file.name}`;
-
-  try {
-    // ImgBB supports any file as base64
-    const b64 = await fileToBase64(file);
-    const form = new FormData();
-    form.append('image', b64.split(',')[1]);
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, { method:'POST', body:form });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error?.message || 'Upload gagal');
-    musicData = { url: data.data.url, name: file.name.replace(/\.[^.]+$/, '') };
-    showMusicPreview();
-  } catch(e) {
-    // fallback: embed as base64 directly (for small files)
-    try {
-      const b64 = await fileToBase64(file);
-      musicData = { url: b64, name: file.name.replace(/\.[^.]+$/, '') };
-      showMusicPreview();
-    } catch(e2) {
-      alert(`Gagal upload musik: ${e.message}`);
-    }
+function extractYTId(url) {
+  if (!url) return null;
+  const patterns = [
+    /youtu\.be\/([^?&\s]+)/,
+    /youtube\.com\/watch\?v=([^&\s]+)/,
+    /youtube\.com\/embed\/([^?&\s]+)/,
+    /youtube\.com\/shorts\/([^?&\s]+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
   }
-  prog.style.display = 'none';
+  return null;
 }
 
-function fileToBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
-  });
-}
-
-function showMusicPreview() {
-  document.getElementById('music-dz').style.display = 'none';
-  document.getElementById('music-preview').style.display = 'block';
-  document.getElementById('music-filename').textContent = musicData.name;
-}
-
-function removeMusic() {
-  musicData = null;
-  document.getElementById('music-dz').style.display = 'flex';
-  document.getElementById('music-preview').style.display = 'none';
-  document.getElementById('music-input').value = '';
+function previewYT() {
+  const url = document.getElementById('yt-url').value.trim();
+  const st  = document.getElementById('yt-status');
+  const prev = document.getElementById('yt-preview');
+  const id = extractYTId(url);
+  if (!id) {
+    st.textContent = url ? '✗ Link tidak valid' : '';
+    st.className = 'key-status err';
+    prev.style.display = 'none';
+    musicData = null;
+    return;
+  }
+  // embed with autoplay muted for preview
+  document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${id}?autoplay=0&controls=1`;
+  prev.style.display = 'block';
+  st.textContent = '✓ Link valid!'; st.className = 'key-status ok';
+  musicData = { ytId: id, name: 'YouTube Music' };
 }
 
 /* ══════════════════════════════════════
-   MUSIC PLAYER
+   YOUTUBE PLAYER
 ══════════════════════════════════════ */
+let ytPanelOpen = false;
+function startYTMusic(ytId) {
+  if (!ytId) return;
+  const wrap = document.getElementById('yt-player-wrap');
+  const iframe = document.getElementById('yt-player');
+  // autoplay=1, loop=1, playlist=ID needed for loop
+  iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&controls=1&rel=0`;
+  document.getElementById('music-bar').classList.add('on');
+  wrap.style.display = 'block';
+  ytPanelOpen = true;
+  musicPlaying = true;
+}
+function toggleYTPanel() {
+  const wrap = document.getElementById('yt-player-wrap');
+  ytPanelOpen = !ytPanelOpen;
+  wrap.style.display = ytPanelOpen ? 'block' : 'none';
+}
 function toggleMusic() {
-  const audio = document.getElementById('bg-audio');
-  const btn = document.getElementById('mbar-play-btn');
-  const eq = document.getElementById('mbar-eq');
-  if (musicPlaying) {
-    audio.pause(); musicPlaying = false;
-    btn.textContent = '▶'; eq.classList.add('paused');
-  } else {
-    audio.play().catch(() => {});
-    musicPlaying = true; btn.textContent = '⏸'; eq.classList.remove('paused');
-  }
+  toggleYTPanel();
 }
 
 /* ══════════════════════════════════════
@@ -1681,18 +1658,8 @@ function goToAlbumFromGalaxy() {
   showScreen('s-album');
   confetti(30);
   // start music
-  if (gData.music && gData.music.url) {
-    const audio = document.getElementById('bg-audio');
-    audio.src = gData.music.url;
-    document.getElementById('mbar-title').textContent = gData.music.name || 'Lagu spesial';
-    document.getElementById('music-bar').classList.add('on');
-    setTimeout(() => {
-      audio.play().then(() => {
-        musicPlaying = true;
-        document.getElementById('mbar-play-btn').textContent = '⏸';
-        document.getElementById('mbar-eq').classList.remove('paused');
-      }).catch(() => {});
-    }, 400);
+  if (gData.music && gData.music.ytId) {
+    setTimeout(() => startYTMusic(gData.music.ytId), 600);
   }
 }
 
