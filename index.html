@@ -510,7 +510,16 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 .gurl-cap:focus{border-color:var(--gold)}
 .gurl-remove{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,100,120,.15);color:var(--pk);cursor:pointer;flex-shrink:0;font-size:.95rem;display:flex;align-items:center;justify-content:center}
 
-/* print next button */
+/* sfx admin rows */
+.sfx-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.sfx-row:last-child{border-bottom:none}
+.sfx-label{font-size:.7rem;color:#d4a0b0;font-weight:700;width:88px;flex-shrink:0;display:flex;flex-direction:column;gap:1px}
+.sfx-label span{font-size:.58rem;color:#6b4055;font-weight:400}
+.sfx-input{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 10px;font-size:.72rem;font-family:'Nunito';color:#f9fafb;outline:none;min-width:0}
+.sfx-input:focus{border-color:var(--pk)}
+.sfx-input.ok{border-color:rgba(134,239,172,.5)}
+.sfx-test-btn{padding:5px 9px;border:1.5px solid rgba(249,168,201,.3);border-radius:7px;background:transparent;color:rgba(249,168,201,.6);font-size:.65rem;font-family:'Nunito';font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.sfx-test-btn:active{background:rgba(249,168,201,.15);color:#fff}
 .print-next-btn{
   position:fixed;bottom:28px;left:50%;
   transform:translateX(-50%) translateY(20px);
@@ -681,7 +690,10 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 </div>
 
 <div class="adm-card">
-  <div class="adm-card-title">🎵 Musik Latar</div>
+  <div class="adm-card-title">🔊 Sound Effects <span class="badge">YT per sfx</span></div>
+  <p style="font-size:.7rem;color:#6b4055;margin-bottom:12px;line-height:1.5">Paste link YouTube untuk tiap SFX. Kosongkan = pakai suara bawaan. Yang disimpan cuma YT ID (link tetap pendek).</p>
+  <div id="sfx-admin-rows" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
   <div class="field">
     <label>Link YouTube</label>
     <div class="key-row">
@@ -834,6 +846,7 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 </div>
 <div style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;z-index:-1">
   <iframe id="yt-player" width="1" height="1" frameborder="0" allow="autoplay;encrypted-media"></iframe>
+  <div id="sfx-iframes"></div>
 </div>
 
 <script>
@@ -853,8 +866,39 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 })();
 
 /* ══════════════════════════════════════════════════
-   WEB AUDIO — SOUND EFFECTS
+   SFX SYSTEM — YT iframe per sfx, fallback synthetic
 ══════════════════════════════════════════════════ */
+
+// SFX registry — key matches id in sfxData
+const SFX_KEYS=['printer','paperfeed','snap','whoosh','ambient','chime','pop','rustle'];
+const sfxIframes={}; // key → iframe el
+let sfxData={}; // key → ytId (populated from gData.sfx)
+
+function initSfxIframes(){
+  const wrap=document.getElementById('sfx-iframes');
+  if(!wrap)return;
+  SFX_KEYS.forEach(k=>{
+    const ifr=document.createElement('iframe');
+    ifr.id='sfx-ifr-'+k;
+    ifr.width='1';ifr.height='1';ifr.frameBorder='0';
+    ifr.allow='autoplay;encrypted-media';
+    ifr.style.cssText='position:absolute;opacity:0;pointer-events:none';
+    wrap.appendChild(ifr);
+    sfxIframes[k]=ifr;
+  });
+}
+
+function playSfxYT(key){
+  const ytId=sfxData[key];
+  if(!ytId)return false; // no custom sfx, use fallback
+  const ifr=sfxIframes[key];
+  if(!ifr)return false;
+  // reload iframe to replay from start
+  ifr.src=`https://www.youtube.com/embed/${ytId}?autoplay=1&controls=0&rel=0&loop=0&mute=0&enablejsapi=0`;
+  return true;
+}
+
+// Each sfx function tries YT first, falls back to synthetic
 let audioCtx=null;
 function getAudio(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
@@ -862,33 +906,26 @@ function getAudio(){
 }
 
 function sfxPrinterMotor(duration=2.5){
+  if(playSfxYT('printer'))return;
   try{
     const ac=getAudio();
-    // low motor hum
     const buf=ac.createBuffer(1,ac.sampleRate*duration,ac.sampleRate);
     const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++){
-      // periodic noise with slight pitch — motor feel
-      d[i]=(Math.random()*2-1)*0.15*Math.sin(i*0.018)*Math.sin(i*0.003);
-    }
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.15*Math.sin(i*0.018)*Math.sin(i*0.003);
     const src=ac.createBufferSource();src.buffer=buf;
     const g=ac.createGain();g.gain.setValueAtTime(0.25,ac.currentTime);
     g.gain.linearRampToValueAtTime(0,ac.currentTime+duration);
     src.connect(g);g.connect(ac.destination);src.start();
-    return src;
   }catch(e){}
 }
 
 function sfxPaperFeed(){
+  if(playSfxYT('paperfeed'))return;
   try{
-    const ac=getAudio();
-    const dur=0.18;
+    const ac=getAudio();const dur=0.18;
     const buf=ac.createBuffer(1,ac.sampleRate*dur,ac.sampleRate);
     const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++){
-      const t=i/ac.sampleRate;
-      d[i]=(Math.random()*2-1)*0.4*Math.exp(-t*18)*Math.sin(i*0.8);
-    }
+    for(let i=0;i<d.length;i++){const t=i/ac.sampleRate;d[i]=(Math.random()*2-1)*0.4*Math.exp(-t*18)*Math.sin(i*0.8);}
     const src=ac.createBufferSource();src.buffer=buf;
     const g=ac.createGain();g.gain.value=0.3;
     src.connect(g);g.connect(ac.destination);src.start();
@@ -896,60 +933,51 @@ function sfxPaperFeed(){
 }
 
 function sfxSnapPhoto(){
+  if(playSfxYT('snap'))return;
   try{
     const ac=getAudio();
-    const osc=ac.createOscillator();
-    const g=ac.createGain();
+    const osc=ac.createOscillator();const g=ac.createGain();
     osc.type='sine';osc.frequency.setValueAtTime(1200,ac.currentTime);
     osc.frequency.linearRampToValueAtTime(600,ac.currentTime+0.08);
-    g.gain.setValueAtTime(0.15,ac.currentTime);
-    g.gain.linearRampToValueAtTime(0,ac.currentTime+0.1);
-    osc.connect(g);g.connect(ac.destination);
-    osc.start();osc.stop(ac.currentTime+0.1);
+    g.gain.setValueAtTime(0.15,ac.currentTime);g.gain.linearRampToValueAtTime(0,ac.currentTime+0.1);
+    osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+0.1);
   }catch(e){}
 }
 
 function sfxWhoosh(){
+  if(playSfxYT('whoosh'))return;
   try{
-    const ac=getAudio();
-    const dur=1.4;
+    const ac=getAudio();const dur=1.4;
     const buf=ac.createBuffer(1,ac.sampleRate*dur,ac.sampleRate);
     const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++){
-      const t=i/ac.sampleRate;
-      d[i]=(Math.random()*2-1)*Math.sin(t*2)*Math.exp(-t*1.8)*0.5;
-    }
+    for(let i=0;i<d.length;i++){const t=i/ac.sampleRate;d[i]=(Math.random()*2-1)*Math.sin(t*2)*Math.exp(-t*1.8)*0.5;}
     const src=ac.createBufferSource();src.buffer=buf;
     const flt=ac.createBiquadFilter();flt.type='bandpass';flt.frequency.value=800;
     const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);
-    g.gain.linearRampToValueAtTime(0.22,ac.currentTime+0.3);
-    g.gain.linearRampToValueAtTime(0,ac.currentTime+dur);
+    g.gain.linearRampToValueAtTime(0.22,ac.currentTime+0.3);g.gain.linearRampToValueAtTime(0,ac.currentTime+dur);
     src.connect(flt);flt.connect(g);g.connect(ac.destination);src.start();
   }catch(e){}
 }
 
 function sfxAmbientHum(dur=8){
+  if(playSfxYT('ambient'))return;
   try{
     const ac=getAudio();
     const buf=ac.createBuffer(1,ac.sampleRate*dur,ac.sampleRate);
     const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++){
-      const t=i/ac.sampleRate;
-      d[i]=(Math.random()*2-1)*0.03*Math.sin(t*0.5);
-    }
+    for(let i=0;i<d.length;i++){const t=i/ac.sampleRate;d[i]=(Math.random()*2-1)*0.03*Math.sin(t*0.5);}
     const src=ac.createBufferSource();src.buffer=buf;
     const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);
-    g.gain.linearRampToValueAtTime(0.12,ac.currentTime+2);
-    g.gain.linearRampToValueAtTime(0,ac.currentTime+dur);
+    g.gain.linearRampToValueAtTime(0.12,ac.currentTime+2);g.gain.linearRampToValueAtTime(0,ac.currentTime+dur);
     src.connect(g);g.connect(ac.destination);src.start();
   }catch(e){}
 }
 
 function sfxChime(){
+  if(playSfxYT('chime'))return;
   try{
     const ac=getAudio();
-    const freqs=[1047,1319,1568];
-    freqs.forEach((f,i)=>{
+    [1047,1319,1568].forEach((f,i)=>{
       const osc=ac.createOscillator();const g=ac.createGain();
       osc.type='sine';osc.frequency.value=f;
       g.gain.setValueAtTime(0,ac.currentTime+i*0.06);
@@ -962,6 +990,7 @@ function sfxChime(){
 }
 
 function sfxPop(){
+  if(playSfxYT('pop'))return;
   try{
     const ac=getAudio();
     for(let i=0;i<5;i++){
@@ -977,15 +1006,12 @@ function sfxPop(){
 }
 
 function sfxPaperRustle(){
+  if(playSfxYT('rustle'))return;
   try{
-    const ac=getAudio();
-    const dur=0.5;
+    const ac=getAudio();const dur=0.5;
     const buf=ac.createBuffer(1,ac.sampleRate*dur,ac.sampleRate);
     const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++){
-      const t=i/ac.sampleRate;
-      d[i]=(Math.random()*2-1)*0.3*Math.exp(-t*6);
-    }
+    for(let i=0;i<d.length;i++){const t=i/ac.sampleRate;d[i]=(Math.random()*2-1)*0.3*Math.exp(-t*6);}
     const src=ac.createBufferSource();src.buffer=buf;
     const flt=ac.createBiquadFilter();flt.type='highpass';flt.frequency.value=2000;
     const g=ac.createGain();g.gain.value=0.25;
@@ -1072,9 +1098,67 @@ function getTexts(){
 function vv(id){const el=document.getElementById(id);return el?el.value.trim():null;}
 
 /* ══════════════════════════════════════════════════
+   SFX ADMIN
+══════════════════════════════════════════════════ */
+const SFX_META=[
+  {key:'printer', label:'Printer Motor',  hint:'suara mesin cetak berputar'},
+  {key:'paperfeed',label:'Paper Feed',    hint:'kertas keluar tiap item'},
+  {key:'snap',    label:'Snap Foto',      hint:'klik saat foto muncul'},
+  {key:'whoosh',  label:'Whoosh',         hint:'transisi masuk galaxy/album'},
+  {key:'ambient', label:'Ambient Galaxy', hint:'hum latar di galaxy'},
+  {key:'chime',   label:'Chime',          hint:'tap polaroid di galaxy'},
+  {key:'pop',     label:'Pop Confetti',   hint:'ledakan confetti ending'},
+  {key:'rustle',  label:'Paper Rustle',   hint:'shuffle doa di ending'},
+];
+
+function initSfxAdminRows(){
+  const wrap=document.getElementById('sfx-admin-rows');
+  if(!wrap)return;
+  SFX_META.forEach(m=>{
+    const row=document.createElement('div');row.className='sfx-row';
+    row.innerHTML=`
+      <div class="sfx-label">${m.label}<span>${m.hint}</span></div>
+      <input class="sfx-input" id="sfx-adm-${m.key}" placeholder="https://youtube.com/watch?v=..." oninput="validateSfxInput('${m.key}')">
+      <button class="sfx-test-btn" onclick="testSfxPlay('${m.key}')">▶ Test</button>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function validateSfxInput(key){
+  const inp=document.getElementById('sfx-adm-'+key);
+  if(!inp)return;
+  const id=extractYTId(inp.value.trim());
+  inp.classList.toggle('ok',!!id);
+}
+
+function testSfxPlay(key){
+  const inp=document.getElementById('sfx-adm-'+key);
+  const id=extractYTId(inp?.value.trim()||'');
+  if(!id){alert('Paste link YouTube yang valid dulu!');return;}
+  // play in sfx iframe directly
+  const ifr=sfxIframes[key];
+  if(ifr) ifr.src=`https://www.youtube.com/embed/${id}?autoplay=1&controls=0&rel=0&mute=0`;
+}
+
+function getSfxData(){
+  const out={};
+  SFX_META.forEach(m=>{
+    const inp=document.getElementById('sfx-adm-'+m.key);
+    const id=extractYTId(inp?.value.trim()||'');
+    if(id) out[m.key]=id;
+  });
+  return Object.keys(out).length?out:null;
+}
+
+// init on load
+document.addEventListener('DOMContentLoaded',initSfxAdminRows);
+
+/* ══════════════════════════════════════════════════
    ROUTING
 ══════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded',()=>{
+  initSfxIframes();
   const hash=location.hash.slice(1);
   if(hash){
     try{
@@ -1083,9 +1167,10 @@ window.addEventListener('DOMContentLoaded',()=>{
       } else {
         gData=JSON.parse(decodeURIComponent(atob(hash)));
       }
+      // load sfx data
+      if(gData.sfx) sfxData={...gData.sfx};
       showScreen('s-machine');
       populateMachine(gData);
-      // music starts on first tap (machine btn click triggers it)
       if(gData.music&&gData.music.ytId){
         const startMusic=()=>{ startYTMusic(gData.music.ytId); document.removeEventListener('click',startMusic); document.removeEventListener('touchstart',startMusic); };
         document.addEventListener('click',startMusic,{once:true});
@@ -1524,7 +1609,8 @@ function generate(){
   if(bubblesData.length&&photosAlbum.length) items.push({type:'sep',text:texts.sep});
   photosAlbum.forEach((p,i)=>items.push({type:'photo',url:p.url,cap:p.cap,anim:p.anim,isGif:p.isGif,num:`${i+1} / ${photosAlbum.length}`}));
   const galaxyPhotos=getGalaxyPhotos();
-  const payload={name:document.getElementById('a-name').value||'Sayang',sub:document.getElementById('a-sub').value||'',end:document.getElementById('a-end').value||'',items,galaxyPhotos,music:musicData,texts};
+  const sfx=getSfxData();
+  const payload={name:document.getElementById('a-name').value||'Sayang',sub:document.getElementById('a-sub').value||'',end:document.getElementById('a-end').value||'',items,galaxyPhotos,music:musicData,sfx,texts};
   try{
     const compressed=LZString.compressToEncodedURIComponent(JSON.stringify(payload));
     const link=location.href.split('#')[0]+'#lz:'+compressed;
