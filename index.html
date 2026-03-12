@@ -499,6 +499,41 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 }
 .ending-close-btn:hover{border-color:var(--pk);color:var(--pk)}
 
+/* galaxy url row */
+.gurl-row{display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.04);border-radius:10px;padding:7px 9px}
+.gurl-num{font-size:.65rem;color:rgba(249,168,201,.4);font-weight:800;width:16px;flex-shrink:0;text-align:center}
+.gurl-thumb{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.06);display:none}
+.gurl-thumb.loaded{display:block}
+.gurl-input{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 10px;font-size:.72rem;font-family:'Nunito';color:#f9fafb;outline:none;min-width:0}
+.gurl-input:focus{border-color:var(--pk)}
+.gurl-cap{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 10px;font-size:.72rem;font-family:'Nunito';color:#f9fafb;outline:none;min-width:0}
+.gurl-cap:focus{border-color:var(--gold)}
+.gurl-remove{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,100,120,.15);color:var(--pk);cursor:pointer;flex-shrink:0;font-size:.95rem;display:flex;align-items:center;justify-content:center}
+
+/* print next button */
+.print-next-btn{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  z-index:20;
+  padding:13px 36px;border:none;border-radius:100px;
+  background:linear-gradient(135deg,var(--pk2),var(--pk3));
+  color:#fff;font-family:'Nunito';font-size:.9rem;font-weight:800;
+  cursor:pointer;box-shadow:0 6px 20px rgba(200,80,130,.4);
+  transition:all .5s cubic-bezier(.34,1.36,.64,1);
+  opacity:0;pointer-events:none;
+}
+.print-next-btn.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+
+/* album photo ticker */
+.album-photo-ticker{width:100%;overflow:hidden;padding:12px 0 4px;position:relative;cursor:grab;user-select:none}
+.album-photo-ticker:active{cursor:grabbing}
+.ticker-track{display:flex;gap:10px;width:max-content;animation:tickerSlide 35s linear infinite;will-change:transform}
+.ticker-track.dragging,.ticker-track:hover{animation-play-state:paused}
+@keyframes tickerSlide{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-card{flex-shrink:0;width:110px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px rgba(200,100,140,.12);border:1px solid rgba(232,121,160,.1)}
+.ticker-card img{width:100%;height:82px;object-fit:cover;display:block}
+.ticker-card-cap{font-size:.58rem;font-family:'Playfair Display',serif;font-style:italic;color:var(--muted);padding:4px 6px;text-align:center;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 /* ═══════════════════════════════════════
    SHARED ANIMATIONS
 ═══════════════════════════════════════ */
@@ -615,18 +650,11 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 
 <!-- FOTO GALAXY -->
 <div class="adm-card">
-  <div class="adm-card-title">🌌 Foto Galaxy <span class="badge">polaroid melayang</span></div>
-  <p style="font-size:.7rem;color:#6b4055;margin-bottom:10px;line-height:1.5">Tampil sebagai polaroid cards yang melayang mengorbit planet di galaxy. Maks 20 foto.</p>
-  <div class="dropzone" id="dropzone-galaxy" ondragover="dzOver(event,'galaxy')" ondragleave="dzLeave('galaxy')" ondrop="dzDrop(event,'galaxy')">
-    <input type="file" id="file-input-galaxy" accept="image/*,.gif" multiple onchange="onFileChange(event,'galaxy')">
-    <div class="dz-icon">🌌</div>
-    <div class="dz-text">Drag & drop / tap untuk pilih<br><span style="font-size:.7rem;opacity:.55">otomatis upload ke ImgBB</span></div>
-  </div>
-  <div id="upload-progress-galaxy" class="upload-progress" style="display:none">
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    <span id="upload-text-galaxy">Uploading...</span>
-  </div>
-  <div class="photo-items" id="photo-items-galaxy"></div>
+  <div class="adm-card-title">🌌 Foto Galaxy <span class="badge">maks 10 · manual URL</span></div>
+  <p style="font-size:.7rem;color:#6b4055;margin-bottom:10px;line-height:1.5">Foto yang melayang di orbit galaxy. Upload foto ke ImgBB/hosting sendiri, lalu paste URL-nya di sini. Maks 10 foto.</p>
+  <div id="galaxy-url-list" style="display:flex;flex-direction:column;gap:7px;margin-bottom:8px"></div>
+  <button class="add-brow-btn" id="add-galaxy-url-btn" onclick="addGalaxyUrl()">+ Tambah Foto Galaxy</button>
+  <div style="font-size:.62rem;color:#6b4055;margin-top:6px;line-height:1.5">💡 Cara dapat URL: upload ke <a href="https://imgbb.com" target="_blank" style="color:var(--pk)">imgbb.com</a> → klik foto → salin "Direct link"</div>
 </div>
 
 <!-- FOTO ALBUM -->
@@ -724,7 +752,7 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
     </div>
     <div class="strip-tear" id="strip-tear" style="display:none"></div>
   </div>
-  <button class="print-skip-btn" id="print-skip-btn" onclick="finishPrintGoGalaxy()">Lewati →</button>
+  <button class="print-next-btn" id="print-next-btn" onclick="finishPrintGoGalaxy()">Lihat Galaxy ✨</button>
 </section>
 
 <!-- ══════════ GALAXY ══════════ -->
@@ -1057,6 +1085,12 @@ window.addEventListener('DOMContentLoaded',()=>{
       }
       showScreen('s-machine');
       populateMachine(gData);
+      // music starts on first tap (machine btn click triggers it)
+      if(gData.music&&gData.music.ytId){
+        const startMusic=()=>{ startYTMusic(gData.music.ytId); document.removeEventListener('click',startMusic); document.removeEventListener('touchstart',startMusic); };
+        document.addEventListener('click',startMusic,{once:true});
+        document.addEventListener('touchstart',startMusic,{once:true});
+      }
     }catch(e){showScreen('s-admin');}
   } else {
     showScreen('s-admin');
@@ -1114,8 +1148,6 @@ function closeValidate(){document.getElementById('v-overlay').classList.remove('
 let printDone=false;
 
 function startPrintScreen(){
-  // start music on user interaction
-  if(gData&&gData.music&&gData.music.ytId) startYTMusic(gData.music.ytId);
   printDone=false;
 
   const tx=(gData&&gData.texts)||{};
@@ -1127,56 +1159,41 @@ function startPrintScreen(){
   strip.innerHTML='';
   strip.style.maxHeight='0';
   document.getElementById('strip-tear').style.display='none';
-  document.getElementById('print-skip-btn').classList.remove('show');
+  const nextBtn=document.getElementById('print-next-btn');
+  nextBtn.classList.remove('show');
 
   showScreen('s-print');
   sfxPrinterMotor(3.5);
 
-  // build items list from gData
   const items=(gData&&gData.items)||[];
-  const photoItems=items.filter(it=>it.type==='photo');
-
-  // inject DOM items into strip (hidden initially)
   buildStripItems(strip,items,tx);
 
-  // show skip after 1.5s
-  setTimeout(()=>document.getElementById('print-skip-btn').classList.add('show'),1500);
-
-  // start revealing: first grow strip, then show items one by one
   const allItems=strip.querySelectorAll('.strip-item');
   const totalItems=allItems.length;
-  const itemDelay=520; // ms per item
-  const stripGrowTime=Math.min(totalItems*itemDelay+800, 8000);
+  const itemDelay=520;
+  const stripGrowTime=Math.min(totalItems*itemDelay+800,8000);
 
-  // grow strip progressively
   strip.style.transition=`max-height ${stripGrowTime}ms cubic-bezier(0.25,0.1,0.25,1)`;
-  // target height: approximate
-  const targetH=Math.max(400, totalItems*120);
-  requestAnimationFrame(()=>{
-    strip.style.maxHeight=targetH+'px';
-  });
+  const targetH=Math.max(400,totalItems*120);
+  requestAnimationFrame(()=>{ strip.style.maxHeight=targetH+'px'; });
 
-  // reveal items with delay + sfx
   allItems.forEach((el,i)=>{
     const isPhoto=el.dataset.type==='photo';
     setTimeout(()=>{
       el.classList.add('visible');
-      if(isPhoto){ sfxSnapPhoto(); }
-      else { sfxPaperFeed(); }
-      // scroll strip into view
+      if(isPhoto) sfxSnapPhoto(); else sfxPaperFeed();
       el.scrollIntoView({behavior:'smooth',block:'nearest'});
-    }, 400 + i*itemDelay);
+    }, 400+i*itemDelay);
   });
 
-  // finish
+  // finish — show next button (no auto-navigate)
   setTimeout(()=>{
     document.getElementById('strip-tear').style.display='block';
     document.getElementById('pmm-status').textContent='selesai ✓';
     sfxPaperFeed();
     printDone=true;
-    // auto go galaxy after 1.5s pause
-    setTimeout(finishPrintGoGalaxy,1500);
-  }, 400 + totalItems*itemDelay + 600);
+    nextBtn.classList.add('show');
+  }, 400+totalItems*itemDelay+600);
 }
 
 function buildStripItems(strip, items, tx){
@@ -1240,6 +1257,36 @@ function buildAlbum(d){
 
   const feed=document.getElementById('feed');feed.innerHTML='';
   const items=d.items||[];
+
+  // photo ticker — slides kanan ke kiri, user bisa scroll
+  const photoItems=items.filter(it=>it.type==='photo');
+  if(photoItems.length){
+    const tickerWrap=document.createElement('div');tickerWrap.className='album-photo-ticker';
+    const track=document.createElement('div');track.className='ticker-track';
+    // duplicate for seamless loop
+    const makeCards=()=>photoItems.map(p=>{
+      const card=document.createElement('div');card.className='ticker-card';
+      const img=document.createElement('img');img.src=p.url;img.alt='';img.loading='lazy';
+      card.appendChild(img);
+      const cap=document.createElement('div');cap.className='ticker-card-cap';
+      cap.textContent=p.cap||'';card.appendChild(cap);
+      return card;
+    });
+    makeCards().forEach(c=>track.appendChild(c));
+    makeCards().forEach(c=>track.appendChild(c)); // duplicate for seamless
+    tickerWrap.appendChild(track);
+    // manual drag/swipe to pause and scroll
+    let isDragging=false,startX=0,scrollLeft=0,tickerOffset=0;
+    tickerWrap.addEventListener('mousedown',e=>{isDragging=true;startX=e.pageX;track.classList.add('dragging');});
+    tickerWrap.addEventListener('mousemove',e=>{if(!isDragging)return;const dx=e.pageX-startX;tickerOffset-=dx*0.5;startX=e.pageX;track.style.transform=`translateX(${tickerOffset}px)`;});
+    tickerWrap.addEventListener('mouseup',()=>{isDragging=false;track.classList.remove('dragging');});
+    tickerWrap.addEventListener('mouseleave',()=>{isDragging=false;track.classList.remove('dragging');});
+    let tStartX=0;
+    tickerWrap.addEventListener('touchstart',e=>{tStartX=e.touches[0].clientX;track.classList.add('dragging');},{passive:true});
+    tickerWrap.addEventListener('touchmove',e=>{const dx=e.touches[0].clientX-tStartX;tickerOffset-=dx*0.4;tStartX=e.touches[0].clientX;track.style.transform=`translateX(${tickerOffset}px)`;},{passive:true});
+    tickerWrap.addEventListener('touchend',()=>track.classList.remove('dragging'));
+    feed.appendChild(tickerWrap);
+  }
   const now=new Date();
   const ts=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
 
@@ -1337,6 +1384,73 @@ function endingClose(){
 /* ══════════════════════════════════════════════════
    IMGBB + FILES
 ══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   GALAXY PHOTO — MANUAL URL INPUT
+══════════════════════════════════════════════════ */
+let galaxyUrlCount=0;
+
+function addGalaxyUrl(){
+  const list=document.getElementById('galaxy-url-list');
+  const current=list.querySelectorAll('.gurl-row').length;
+  if(current>=10){alert('Maksimal 10 foto galaxy!');return;}
+  const id=++galaxyUrlCount;
+  const row=document.createElement('div');row.className='gurl-row';row.id='gurl-'+id;
+  row.innerHTML=`
+    <span class="gurl-num">${current+1}</span>
+    <img class="gurl-thumb" id="gthumb-${id}" src="" alt="">
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+      <input class="gurl-input" id="gurl-url-${id}" placeholder="https://i.ibb.co/..." oninput="previewGalaxyUrl(${id})">
+      <input class="gurl-cap" id="gurl-cap-${id}" placeholder="Caption (opsional)...">
+    </div>
+    <button class="gurl-remove" onclick="removeGalaxyUrl(${id})">×</button>
+  `;
+  list.appendChild(row);
+  // renumber
+  list.querySelectorAll('.gurl-num').forEach((el,i)=>el.textContent=i+1);
+}
+
+function previewGalaxyUrl(id){
+  const url=document.getElementById('gurl-url-'+id)?.value.trim();
+  const thumb=document.getElementById('gthumb-'+id);
+  const input=document.getElementById('gurl-url-'+id);
+  if(!url){thumb.classList.remove('loaded');return;}
+  const img=new Image();
+  img.onload=()=>{ thumb.src=url; thumb.classList.add('loaded'); input.style.borderColor='rgba(134,239,172,.5)'; };
+  img.onerror=()=>{ thumb.classList.remove('loaded'); input.style.borderColor='rgba(252,165,165,.5)'; };
+  img.src=url;
+}
+
+function removeGalaxyUrl(id){
+  document.getElementById('gurl-'+id)?.remove();
+  document.getElementById('galaxy-url-list').querySelectorAll('.gurl-num').forEach((el,i)=>el.textContent=i+1);
+}
+
+function getGalaxyPhotos(){
+  const rows=document.querySelectorAll('#galaxy-url-list .gurl-row');
+  return Array.from(rows).map(row=>{
+    const id=row.id.replace('gurl-','');
+    const url=document.getElementById('gurl-url-'+id)?.value.trim()||'';
+    const cap=document.getElementById('gurl-cap-'+id)?.value.trim()||'';
+    return url?{url,cap}:null;
+  }).filter(Boolean);
+}
+
+function addBrow(side='right',text=''){
+  const id=++browCount;
+  const list=document.getElementById('bubble-rows');
+  const row=document.createElement('div');row.className='brow';row.id='brow-'+id;
+  row.innerHTML=`<select id="bside-${id}"><option value="right" ${side==='right'?'selected':''}>Kanan</option><option value="left" ${side==='left'?'selected':''}>Kiri</option></select><input id="btext-${id}" placeholder="Isi pesan..." value="${text.replace(/"/g,'&quot;')}"><button class="brow-remove" onclick="removeBrow(${id})">×</button>`;
+  list.appendChild(row);
+}
+function removeBrow(id){document.getElementById('brow-'+id)?.remove();}
+function getBubbleData(){
+  return Array.from(document.querySelectorAll('.brow')).map(row=>{
+    const id=row.id.replace('brow-','');
+    return{side:document.getElementById('bside-'+id)?.value||'right',text:document.getElementById('btext-'+id)?.value?.trim()||''};
+  }).filter(b=>b.text);
+}
+
+/* ImgBB + album upload */
 async function uploadToImgBB(file){
   const key=document.getElementById('imgbb-key').value.trim();
   if(!key) throw new Error('API key kosong');
@@ -1359,73 +1473,42 @@ async function testImgBB(){
     else{st.textContent='✗ Key tidak valid';st.className='key-status err';}
   }catch(e){st.textContent='✗ Gagal konek';st.className='key-status err';}
 }
-
 function dzOver(e,pool){e.preventDefault();document.getElementById('dropzone-'+pool).classList.add('drag');}
 function dzLeave(pool){document.getElementById('dropzone-'+pool).classList.remove('drag');}
-function dzDrop(e,pool){e.preventDefault();document.getElementById('dropzone-'+pool).classList.remove('drag');processFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')),pool);}
-function onFileChange(e,pool){processFiles(Array.from(e.target.files),pool);e.target.value='';}
-
-async function processFiles(files,pool){
-  const arr=pool==='galaxy'?photosGalaxy:photosAlbum;
-  const maxN=pool==='galaxy'?20:30;
-  const toAdd=files.slice(0,maxN-arr.length);if(!toAdd.length)return;
+function dzDrop(e,pool){e.preventDefault();document.getElementById('dropzone-'+pool).classList.remove('drag');processFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')));}
+function onFileChange(e,pool){processFiles(Array.from(e.target.files));e.target.value='';}
+async function processFiles(files){
+  const toAdd=files.slice(0,30-photosAlbum.length);if(!toAdd.length)return;
   const key=document.getElementById('imgbb-key').value.trim();
   if(!key){alert('Masukkan ImgBB API key dulu!');return;}
-  const prog=document.getElementById('upload-progress-'+pool);
-  const progText=document.getElementById('upload-text-'+pool);
+  const prog=document.getElementById('upload-progress-album');
+  const progText=document.getElementById('upload-text-album');
   prog.style.display='flex';
   for(let i=0;i<toAdd.length;i++){
     const file=toAdd[i];progText.textContent=`Uploading ${i+1}/${toAdd.length}: ${file.name}`;
     try{
       const url=await uploadToImgBB(file);
       const preview=await readPreview(file);
-      arr.push({url,name:file.name,cap:'',anim:'none',isGif:file.type==='image/gif',preview});
-      renderPhotoItems(pool);
+      photosAlbum.push({url,name:file.name,cap:'',anim:'none',isGif:file.type==='image/gif',preview});
+      renderPhotoItems();
     }catch(e){alert(`Gagal upload ${file.name}: ${e.message}`);}
   }
   prog.style.display='none';
 }
 function readPreview(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});}
-
-function renderPhotoItems(pool){
-  const arr=pool==='galaxy'?photosGalaxy:photosAlbum;
-  const list=document.getElementById('photo-items-'+pool);list.innerHTML='';
-  const showAnim=pool==='album';
-  arr.forEach((p,i)=>{
-    const item=document.createElement('div');item.className='photo-item';item.draggable=true;item.id=`pi-${pool}-${i}`;
-    item.ondragstart=()=>dragStart(pool,i);item.ondragover=e=>e.preventDefault();item.ondrop=e=>{e.preventDefault();dragEnd(pool,i);};
-    const animOpts=showAnim?ANIM_OPTIONS.map(o=>`<option value="${o.v}" ${p.anim===o.v?'selected':''}>${o.l}</option>`).join(''):'';
-    const animRow=showAnim?`<select class="photo-item-anim" onchange="${pool==='galaxy'?'photosGalaxy':'photosAlbum'}[${i}].anim=this.value">${animOpts}</select>`:'';
-    item.innerHTML=`<span class="photo-item-drag">⣿</span><img class="photo-item-thumb" src="${p.preview}" alt=""><div class="photo-item-body"><span class="photo-item-name">${p.name}${p.isGif?' (GIF)':''}</span><input class="photo-item-cap" placeholder="Caption..." value="${p.cap}" oninput="${pool==='galaxy'?'photosGalaxy':'photosAlbum'}[${i}].cap=this.value">${animRow}</div><button class="photo-item-remove" onclick="removePhoto('${pool}',${i})">×</button>`;
+function renderPhotoItems(){
+  const list=document.getElementById('photo-items-album');list.innerHTML='';
+  photosAlbum.forEach((p,i)=>{
+    const item=document.createElement('div');item.className='photo-item';item.draggable=true;item.id='pi-album-'+i;
+    item.ondragstart=()=>{_dragIdx=i;item.classList.add('dragging');};
+    item.ondragover=e=>e.preventDefault();
+    item.ondrop=e=>{e.preventDefault();if(_dragIdx<0||_dragIdx===i)return;const m=photosAlbum.splice(_dragIdx,1)[0];photosAlbum.splice(i,0,m);_dragIdx=-1;renderPhotoItems();};
+    const animOpts=ANIM_OPTIONS.map(o=>`<option value="${o.v}" ${p.anim===o.v?'selected':''}>${o.l}</option>`).join('');
+    item.innerHTML=`<span class="photo-item-drag">⣿</span><img class="photo-item-thumb" src="${p.preview}" alt=""><div class="photo-item-body"><span class="photo-item-name">${p.name}${p.isGif?' (GIF)':''}</span><input class="photo-item-cap" placeholder="Caption..." value="${p.cap}" oninput="photosAlbum[${i}].cap=this.value"><select class="photo-item-anim" onchange="photosAlbum[${i}].anim=this.value">${animOpts}</select></div><button class="photo-item-remove" onclick="photosAlbum.splice(${i},1);renderPhotoItems()">×</button>`;
     list.appendChild(item);
   });
 }
-let _dragPool='',_dragIdx=-1;
-function dragStart(pool,i){_dragPool=pool;_dragIdx=i;document.getElementById(`pi-${pool}-${i}`).classList.add('dragging');}
-function dragEnd(pool,ti){
-  if(_dragIdx<0||_dragIdx===ti||_dragPool!==pool)return;
-  const arr=pool==='galaxy'?photosGalaxy:photosAlbum;
-  const m=arr.splice(_dragIdx,1)[0];arr.splice(ti,0,m);_dragIdx=-1;renderPhotoItems(pool);
-}
-function removePhoto(pool,i){
-  const arr=pool==='galaxy'?photosGalaxy:photosAlbum;
-  arr.splice(i,1);renderPhotoItems(pool);
-}
-
-function addBrow(side='right',text=''){
-  const id=++browCount;
-  const list=document.getElementById('bubble-rows');
-  const row=document.createElement('div');row.className='brow';row.id='brow-'+id;
-  row.innerHTML=`<select id="bside-${id}"><option value="right" ${side==='right'?'selected':''}>Kanan</option><option value="left" ${side==='left'?'selected':''}>Kiri</option></select><input id="btext-${id}" placeholder="Isi pesan..." value="${text.replace(/"/g,'&quot;')}"><button class="brow-remove" onclick="removeBrow(${id})">×</button>`;
-  list.appendChild(row);
-}
-function removeBrow(id){document.getElementById('brow-'+id)?.remove();}
-function getBubbleData(){
-  return Array.from(document.querySelectorAll('.brow')).map(row=>{
-    const id=row.id.replace('brow-','');
-    return{side:document.getElementById('bside-'+id)?.value||'right',text:document.getElementById('btext-'+id)?.value?.trim()||''};
-  }).filter(b=>b.text);
-}
+let _dragIdx=-1;
 
 /* ══════════════════════════════════════════════════
    GENERATE
@@ -1436,13 +1519,11 @@ function generate(){
   const st=document.getElementById('jb-status');st.textContent='';st.className='key-status';
   const texts=getTexts();
   const bubblesData=getBubbleData();
-  // album items: bubbles + sep + album photos
   const items=[];
   bubblesData.forEach(b=>items.push({type:'bubble',side:b.side,text:b.text}));
   if(bubblesData.length&&photosAlbum.length) items.push({type:'sep',text:texts.sep});
   photosAlbum.forEach((p,i)=>items.push({type:'photo',url:p.url,cap:p.cap,anim:p.anim,isGif:p.isGif,num:`${i+1} / ${photosAlbum.length}`}));
-  // galaxy photos separate
-  const galaxyPhotos=photosGalaxy.map(p=>({url:p.url,cap:p.cap}));
+  const galaxyPhotos=getGalaxyPhotos();
   const payload={name:document.getElementById('a-name').value||'Sayang',sub:document.getElementById('a-sub').value||'',end:document.getElementById('a-end').value||'',items,galaxyPhotos,music:musicData,texts};
   try{
     const compressed=LZString.compressToEncodedURIComponent(JSON.stringify(payload));
@@ -1681,7 +1762,7 @@ function initThreeGalaxy(d,canvas){
     const img=new Image();img.crossOrigin='anonymous';
     img.onload=()=>{
       const tex=makePolaroidTex(img,item.cap||'');
-      const geo=new THREE.PlaneGeometry(14,17.5);
+      const geo=new THREE.PlaneGeometry(6,7.5);
       const mFront=new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.FrontSide,depthWrite:true});
       const mBack=new THREE.MeshBasicMaterial({map:makeBackTex(),transparent:false,side:THREE.BackSide,depthWrite:true});
       const group=new THREE.Group();
