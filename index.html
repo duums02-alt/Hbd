@@ -659,11 +659,18 @@ html,body{width:100%;min-height:100vh;font-family:'Nunito',sans-serif;background
 
 <!-- FOTO GALAXY -->
 <div class="adm-card">
-  <div class="adm-card-title">🌌 Foto Galaxy <span class="badge">maks 10 · manual URL</span></div>
-  <p style="font-size:.7rem;color:#6b4055;margin-bottom:10px;line-height:1.5">Foto yang melayang di orbit galaxy. Upload foto ke ImgBB/hosting sendiri, lalu paste URL-nya di sini. Maks 10 foto.</p>
-  <div id="galaxy-url-list" style="display:flex;flex-direction:column;gap:7px;margin-bottom:8px"></div>
-  <button class="add-brow-btn" id="add-galaxy-url-btn" onclick="addGalaxyUrl()">+ Tambah Foto Galaxy</button>
-  <div style="font-size:.62rem;color:#6b4055;margin-top:6px;line-height:1.5">💡 Cara dapat URL: upload ke <a href="https://imgbb.com" target="_blank" style="color:var(--pk)">imgbb.com</a> → klik foto → salin "Direct link"</div>
+  <div class="adm-card-title">🌌 Foto Galaxy <span class="badge">polaroid melayang · maks 10</span></div>
+  <p style="font-size:.7rem;color:#6b4055;margin-bottom:10px;line-height:1.5">Tampil sebagai polaroid kecil yang melayang mengorbit planet. Maks 10 foto.</p>
+  <div class="dropzone" id="dropzone-galaxy" ondragover="dzOver(event,'galaxy')" ondragleave="dzLeave('galaxy')" ondrop="dzDrop(event,'galaxy')">
+    <input type="file" id="file-input-galaxy" accept="image/*,.gif" multiple onchange="onFileChange(event,'galaxy')">
+    <div class="dz-icon">🌌</div>
+    <div class="dz-text">Drag & drop / tap untuk pilih<br><span style="font-size:.7rem;opacity:.55">otomatis upload ke ImgBB</span></div>
+  </div>
+  <div id="upload-progress-galaxy" class="upload-progress" style="display:none">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <span id="upload-text-galaxy">Uploading...</span>
+  </div>
+  <div class="photo-items" id="photo-items-galaxy"></div>
 </div>
 
 <!-- FOTO ALBUM -->
@@ -1470,72 +1477,8 @@ function endingClose(){
    IMGBB + FILES
 ══════════════════════════════════════════════════ */
 /* ══════════════════════════════════════════════════
-   GALAXY PHOTO — MANUAL URL INPUT
+   IMGBB + UPLOAD (galaxy & album)
 ══════════════════════════════════════════════════ */
-let galaxyUrlCount=0;
-
-function addGalaxyUrl(){
-  const list=document.getElementById('galaxy-url-list');
-  const current=list.querySelectorAll('.gurl-row').length;
-  if(current>=10){alert('Maksimal 10 foto galaxy!');return;}
-  const id=++galaxyUrlCount;
-  const row=document.createElement('div');row.className='gurl-row';row.id='gurl-'+id;
-  row.innerHTML=`
-    <span class="gurl-num">${current+1}</span>
-    <img class="gurl-thumb" id="gthumb-${id}" src="" alt="">
-    <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
-      <input class="gurl-input" id="gurl-url-${id}" placeholder="https://i.ibb.co/..." oninput="previewGalaxyUrl(${id})">
-      <input class="gurl-cap" id="gurl-cap-${id}" placeholder="Caption (opsional)...">
-    </div>
-    <button class="gurl-remove" onclick="removeGalaxyUrl(${id})">×</button>
-  `;
-  list.appendChild(row);
-  // renumber
-  list.querySelectorAll('.gurl-num').forEach((el,i)=>el.textContent=i+1);
-}
-
-function previewGalaxyUrl(id){
-  const url=document.getElementById('gurl-url-'+id)?.value.trim();
-  const thumb=document.getElementById('gthumb-'+id);
-  const input=document.getElementById('gurl-url-'+id);
-  if(!url){thumb.classList.remove('loaded');return;}
-  const img=new Image();
-  img.onload=()=>{ thumb.src=url; thumb.classList.add('loaded'); input.style.borderColor='rgba(134,239,172,.5)'; };
-  img.onerror=()=>{ thumb.classList.remove('loaded'); input.style.borderColor='rgba(252,165,165,.5)'; };
-  img.src=url;
-}
-
-function removeGalaxyUrl(id){
-  document.getElementById('gurl-'+id)?.remove();
-  document.getElementById('galaxy-url-list').querySelectorAll('.gurl-num').forEach((el,i)=>el.textContent=i+1);
-}
-
-function getGalaxyPhotos(){
-  const rows=document.querySelectorAll('#galaxy-url-list .gurl-row');
-  return Array.from(rows).map(row=>{
-    const id=row.id.replace('gurl-','');
-    const url=document.getElementById('gurl-url-'+id)?.value.trim()||'';
-    const cap=document.getElementById('gurl-cap-'+id)?.value.trim()||'';
-    return url?{url,cap}:null;
-  }).filter(Boolean);
-}
-
-function addBrow(side='right',text=''){
-  const id=++browCount;
-  const list=document.getElementById('bubble-rows');
-  const row=document.createElement('div');row.className='brow';row.id='brow-'+id;
-  row.innerHTML=`<select id="bside-${id}"><option value="right" ${side==='right'?'selected':''}>Kanan</option><option value="left" ${side==='left'?'selected':''}>Kiri</option></select><input id="btext-${id}" placeholder="Isi pesan..." value="${text.replace(/"/g,'&quot;')}"><button class="brow-remove" onclick="removeBrow(${id})">×</button>`;
-  list.appendChild(row);
-}
-function removeBrow(id){document.getElementById('brow-'+id)?.remove();}
-function getBubbleData(){
-  return Array.from(document.querySelectorAll('.brow')).map(row=>{
-    const id=row.id.replace('brow-','');
-    return{side:document.getElementById('bside-'+id)?.value||'right',text:document.getElementById('btext-'+id)?.value?.trim()||''};
-  }).filter(b=>b.text);
-}
-
-/* ImgBB + album upload */
 async function uploadToImgBB(file){
   const key=document.getElementById('imgbb-key').value.trim();
   if(!key) throw new Error('API key kosong');
@@ -1558,42 +1501,87 @@ async function testImgBB(){
     else{st.textContent='✗ Key tidak valid';st.className='key-status err';}
   }catch(e){st.textContent='✗ Gagal konek';st.className='key-status err';}
 }
+
 function dzOver(e,pool){e.preventDefault();document.getElementById('dropzone-'+pool).classList.add('drag');}
 function dzLeave(pool){document.getElementById('dropzone-'+pool).classList.remove('drag');}
-function dzDrop(e,pool){e.preventDefault();document.getElementById('dropzone-'+pool).classList.remove('drag');processFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')));}
-function onFileChange(e,pool){processFiles(Array.from(e.target.files));e.target.value='';}
-async function processFiles(files){
-  const toAdd=files.slice(0,30-photosAlbum.length);if(!toAdd.length)return;
+function dzDrop(e,pool){e.preventDefault();document.getElementById('dropzone-'+pool).classList.remove('drag');processFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')),pool);}
+function onFileChange(e,pool){processFiles(Array.from(e.target.files),pool);e.target.value='';}
+
+async function processFiles(files,pool){
+  const isGalaxy=pool==='galaxy';
+  const arr=isGalaxy?photosGalaxy:photosAlbum;
+  const maxN=isGalaxy?10:30;
+  const toAdd=files.slice(0,maxN-arr.length);
+  if(!toAdd.length){alert(`Maks ${maxN} foto untuk ${isGalaxy?'galaxy':'album'}!`);return;}
   const key=document.getElementById('imgbb-key').value.trim();
   if(!key){alert('Masukkan ImgBB API key dulu!');return;}
-  const prog=document.getElementById('upload-progress-album');
-  const progText=document.getElementById('upload-text-album');
+  const prog=document.getElementById('upload-progress-'+pool);
+  const progText=document.getElementById('upload-text-'+pool);
   prog.style.display='flex';
   for(let i=0;i<toAdd.length;i++){
-    const file=toAdd[i];progText.textContent=`Uploading ${i+1}/${toAdd.length}: ${file.name}`;
+    const file=toAdd[i];
+    progText.textContent=`Uploading ${i+1}/${toAdd.length}: ${file.name}`;
     try{
       const url=await uploadToImgBB(file);
       const preview=await readPreview(file);
-      photosAlbum.push({url,name:file.name,cap:'',anim:'none',isGif:file.type==='image/gif',preview});
-      renderPhotoItems();
+      arr.push({url,name:file.name,cap:'',anim:'none',isGif:file.type==='image/gif',preview});
+      renderPhotoItems(pool);
     }catch(e){alert(`Gagal upload ${file.name}: ${e.message}`);}
   }
   prog.style.display='none';
 }
-function readPreview(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});}
-function renderPhotoItems(){
-  const list=document.getElementById('photo-items-album');list.innerHTML='';
-  photosAlbum.forEach((p,i)=>{
-    const item=document.createElement('div');item.className='photo-item';item.draggable=true;item.id='pi-album-'+i;
-    item.ondragstart=()=>{_dragIdx=i;item.classList.add('dragging');};
+
+function readPreview(file){
+  return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});
+}
+
+function renderPhotoItems(pool){
+  const isGalaxy=pool==='galaxy';
+  const arr=isGalaxy?photosGalaxy:photosAlbum;
+  const list=document.getElementById('photo-items-'+pool);
+  list.innerHTML='';
+  arr.forEach((p,i)=>{
+    const item=document.createElement('div');
+    item.className='photo-item';item.draggable=true;item.id=`pi-${pool}-${i}`;
+    item.ondragstart=()=>{_dragPool=pool;_dragIdx=i;item.classList.add('dragging');};
     item.ondragover=e=>e.preventDefault();
-    item.ondrop=e=>{e.preventDefault();if(_dragIdx<0||_dragIdx===i)return;const m=photosAlbum.splice(_dragIdx,1)[0];photosAlbum.splice(i,0,m);_dragIdx=-1;renderPhotoItems();};
-    const animOpts=ANIM_OPTIONS.map(o=>`<option value="${o.v}" ${p.anim===o.v?'selected':''}>${o.l}</option>`).join('');
-    item.innerHTML=`<span class="photo-item-drag">⣿</span><img class="photo-item-thumb" src="${p.preview}" alt=""><div class="photo-item-body"><span class="photo-item-name">${p.name}${p.isGif?' (GIF)':''}</span><input class="photo-item-cap" placeholder="Caption..." value="${p.cap}" oninput="photosAlbum[${i}].cap=this.value"><select class="photo-item-anim" onchange="photosAlbum[${i}].anim=this.value">${animOpts}</select></div><button class="photo-item-remove" onclick="photosAlbum.splice(${i},1);renderPhotoItems()">×</button>`;
+    item.ondrop=e=>{
+      e.preventDefault();
+      if(_dragIdx<0||_dragIdx===i||_dragPool!==pool)return;
+      const src=isGalaxy?photosGalaxy:photosAlbum;
+      const m=src.splice(_dragIdx,1)[0];src.splice(i,0,m);
+      _dragIdx=-1;renderPhotoItems(pool);
+    };
+    // galaxy: no anim picker (polaroid kecil); album: full options
+    const animOpts=!isGalaxy?ANIM_OPTIONS.map(o=>`<option value="${o.v}" ${p.anim===o.v?'selected':''}>${o.l}</option>`).join(''):'';
+    const animRow=!isGalaxy?'':``.replace('','')||(!isGalaxy?`<select class="photo-item-anim" onchange="photosAlbum[${i}].anim=this.value">${animOpts}</select>`:'');
+    const bodyExtra=isGalaxy
+      ? `<input class="photo-item-cap" placeholder="Caption..." value="${p.cap}" oninput="photosGalaxy[${i}].cap=this.value">`
+      : `<input class="photo-item-cap" placeholder="Caption..." value="${p.cap}" oninput="photosAlbum[${i}].cap=this.value"><select class="photo-item-anim" onchange="photosAlbum[${i}].anim=this.value">${animOpts}</select>`;
+    item.innerHTML=`<span class="photo-item-drag">⣿</span><img class="photo-item-thumb" src="${p.preview}" alt=""><div class="photo-item-body"><span class="photo-item-name">${p.name}${p.isGif?' (GIF)':''}</span>${bodyExtra}</div><button class="photo-item-remove" onclick="${isGalaxy?'photosGalaxy':'photosAlbum'}.splice(${i},1);renderPhotoItems('${pool}')">×</button>`;
     list.appendChild(item);
   });
 }
-let _dragIdx=-1;
+let _dragPool='',_dragIdx=-1;
+
+function getGalaxyPhotos(){
+  return photosGalaxy.map(p=>({url:p.url,cap:p.cap}));
+}
+
+function addBrow(side='right',text=''){
+  const id=++browCount;
+  const list=document.getElementById('bubble-rows');
+  const row=document.createElement('div');row.className='brow';row.id='brow-'+id;
+  row.innerHTML=`<select id="bside-${id}"><option value="right" ${side==='right'?'selected':''}>Kanan</option><option value="left" ${side==='left'?'selected':''}>Kiri</option></select><input id="btext-${id}" placeholder="Isi pesan..." value="${text.replace(/"/g,'&quot;')}"><button class="brow-remove" onclick="removeBrow(${id})">×</button>`;
+  list.appendChild(row);
+}
+function removeBrow(id){document.getElementById('brow-'+id)?.remove();}
+function getBubbleData(){
+  return Array.from(document.querySelectorAll('.brow')).map(row=>{
+    const id=row.id.replace('brow-','');
+    return{side:document.getElementById('bside-'+id)?.value||'right',text:document.getElementById('btext-'+id)?.value?.trim()||''};
+  }).filter(b=>b.text);
+}
 
 /* ══════════════════════════════════════════════════
    GENERATE
