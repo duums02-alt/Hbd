@@ -129,9 +129,9 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .photo-item-name{font-size:.7rem;color:#d4a0b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .photo-item-cap{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.08);border-radius:7px;padding:5px 8px;font-size:.78rem;font-family:'Nunito';color:#f9fafb;outline:none;width:100%}
 .photo-item-cap:focus{border-color:var(--pk)}
-.photo-item-remove{width:26px;height:26px;border-radius:50%;border:none;background:rgba(255,100,120,.15);color:var(--pk);font-size:1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.photo-item-remove{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,100,120,.25);color:var(--pk);font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation}
 .photo-item-drag{cursor:grab;color:#6b4055;font-size:.9rem;flex-shrink:0;user-select:none}
-.upload-progress{font-size:.72rem;color:var(--pk);margin-top:6px;height:16px;display:none;align-items:center;gap:5px}
+.upload-progress{font-size:.72rem;color:var(--pk);margin-top:8px;min-height:36px;display:none;flex-direction:column;gap:4px;padding:8px 10px;background:rgba(249,168,201,.08);border-radius:8px;border:1px solid rgba(249,168,201,.15)}
 .upload-dot{width:5px;height:5px;border-radius:50%;background:var(--pk);animation:dotPulse .8s ease-in-out infinite}
 .upload-dot:nth-child(2){animation-delay:.15s}
 .upload-dot:nth-child(3){animation-delay:.3s}
@@ -147,7 +147,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .brow-choice-row{display:flex;gap:4px;align-items:center}
 .brow-choice-row input{flex:1;font-size:.72rem;padding:4px 8px}
 .brow-choice-label{font-size:.62rem;color:#6b4055;flex-shrink:0}
-.brow-remove{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,100,120,.15);color:var(--pk);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.brow-remove{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,100,120,.2);color:#ff6b8a;font-size:1rem;font-weight:900;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;pointer-events:auto;touch-action:manipulation}
 .add-brow-btn{width:100%;padding:8px;border:1.5px dashed rgba(249,168,201,.22);border-radius:10px;background:transparent;color:var(--pk);font-size:.78rem;font-family:'Nunito';font-weight:700;cursor:pointer;margin-top:4px}
 .amplop-section{display:flex;flex-direction:column;gap:8px}
 .amplop-preview{width:100%;border-radius:10px;overflow:hidden;background:#1a0410;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;position:relative}
@@ -227,7 +227,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .pmm-light{width:5px;height:5px;border-radius:50%;animation:lightBlink 1.2s ease-in-out infinite}
 .pmm-light:nth-child(1){background:var(--pk)}.pmm-light:nth-child(2){background:var(--gold);animation-delay:.2s}.pmm-light:nth-child(3){background:var(--mint);animation-delay:.4s}.pmm-light:nth-child(4){background:var(--lav);animation-delay:.6s}.pmm-light:nth-child(5){background:var(--pk);animation-delay:.8s}
 .print-slot-bar{height:12px;background:linear-gradient(180deg,#060103,#0d0208);border-left:2px solid rgba(249,168,201,.2);border-right:2px solid rgba(249,168,201,.2);box-shadow:inset 0 4px 8px rgba(0,0,0,.9)}
-.print-scroll-area{flex:1;width:100%;max-width:380px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:90px;min-height:0}
+.print-scroll-area{flex:1;width:100%;max-width:380px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:180px;min-height:0}
 .print-scroll-area::-webkit-scrollbar{display:none}
 .print-paper{width:100%;background:linear-gradient(180deg,#fffbf8,#fff9f5);border-left:2px solid rgba(249,168,201,.12);border-right:2px solid rgba(249,168,201,.12);min-height:100%;position:relative}
 .print-paper::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,transparent,rgba(249,168,201,.35),transparent)}
@@ -278,8 +278,8 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .strip-tear-end{width:100%;height:16px;position:relative;overflow:hidden}
 .strip-tear-end::before{content:'';position:absolute;bottom:0;left:-5%;right:-5%;height:16px;background:linear-gradient(180deg,#fffbf8,transparent);clip-path:polygon(0% 0%,2% 70%,4% 20%,6% 80%,8% 30%,10% 90%,12% 40%,14% 85%,16% 25%,18% 75%,20% 35%,22% 95%,24% 45%,26% 80%,28% 20%,30% 70%,32% 30%,34% 85%,36% 40%,38% 90%,40% 35%,42% 75%,44% 25%,46% 80%,48% 45%,50% 95%,52% 40%,54% 85%,56% 30%,58% 75%,60% 20%,62% 70%,64% 35%,66% 90%,68% 25%,70% 80%,72% 40%,74% 85%,76% 30%,78% 70%,80% 20%,82% 75%,84% 35%,86% 90%,88% 45%,90% 85%,92% 30%,94% 70%,96% 25%,98% 65%,100% 15%,100% 0%)}
 /* reply dock */
-.reply-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(110%);width:100%;max-width:380px;z-index:500;background:rgba(255,244,250,.97);backdrop-filter:blur(24px);border-top:1px solid rgba(232,121,160,.2);padding:10px 14px 28px;transition:transform .42s cubic-bezier(.34,1.36,.64,1);box-shadow:0 -6px 28px rgba(200,80,130,.14)}
-.reply-dock.show{transform:translateX(-50%) translateY(0)}
+.reply-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(110%);width:100%;max-width:380px;z-index:700;background:rgba(255,244,250,.99);backdrop-filter:blur(24px);border-top:1px solid rgba(232,121,160,.2);padding:10px 14px 56px;transition:transform .42s cubic-bezier(.34,1.36,.64,1);box-shadow:0 -6px 28px rgba(200,80,130,.14)}
+.reply-dock.show{transform:translateX(-50%) translateY(0);bottom:72px}
 .reply-hint-text{font-size:.63rem;color:var(--muted);text-align:center;margin-bottom:9px}
 .reply-row{display:flex;gap:9px;align-items:flex-end}
 .reply-preview-box{flex:1;background:#fff;border-radius:22px;border-bottom-right-radius:6px;padding:11px 15px;font-size:.84rem;color:var(--text);font-weight:500;border:1.5px solid rgba(232,121,160,.18);line-height:1.45;cursor:pointer;user-select:none}
@@ -433,7 +433,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .ending-flash-photo img{max-width:80%;max-height:60vh;border-radius:16px;box-shadow:0 0 40px rgba(249,168,201,.4);object-fit:contain}
 
 /* ═══ VINYL MUSIC BAR ═══ */
-#music-bar{position:fixed;bottom:0;left:0;right:0;z-index:600;background:rgba(10,3,8,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(249,168,201,.12);padding:8px 16px 20px;display:none;align-items:center;gap:12px}
+#music-bar{position:fixed;bottom:0;left:0;right:0;z-index:650;background:rgba(10,3,8,.92);backdrop-filter:blur(20px);border-top:1px solid rgba(249,168,201,.12);padding:8px 16px 20px;display:none;align-items:center;gap:12px}
 #music-bar.on{display:flex;animation:slideBarUp .5s cubic-bezier(.34,1.36,.64,1) both}
 @keyframes slideBarUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .vinyl-disc{width:44px;height:44px;border-radius:50%;background:conic-gradient(#1a0d14 0deg,#2d1020 60deg,#1a0d14 120deg,#3d0a20 180deg,#1a0d14 240deg,#2d1020 300deg,#1a0d14 360deg);border:2px solid rgba(249,168,201,.15);position:relative;flex-shrink:0;animation:vinylSpin 3s linear infinite;box-shadow:0 0 12px rgba(0,0,0,.6),inset 0 0 8px rgba(0,0,0,.4)}
@@ -656,40 +656,80 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
     <div class="adm-card">
       <div class="adm-card-title">🌌 Foto Galaxy <span class="badge">maks 24 · fibonacci 3D</span></div>
       <div class="dropzone" id="dropzone-galaxy" ondragover="dzOver(event,'galaxy')" ondragleave="dzLeave('galaxy')" ondrop="dzDrop(event,'galaxy')">
-        <input type="file" accept="image/*" multiple onchange="onFileChange(event,'galaxy')">
-        <div class="dz-icon">🌌</div><div class="dz-text">Drag & drop / tap untuk pilih</div>
+        <input type="file" accept="image/*" multiple id="fileinput-galaxy" style="display:none" onchange="onFileChange(event,'galaxy')">
+        <div class="dz-icon">🌌</div>
+        <div class="dz-text">Drag & drop di sini</div>
+        <button type="button" onclick="document.getElementById('fileinput-galaxy').click()" style="margin-top:8px;padding:8px 20px;border:none;border-radius:100px;background:var(--pk2);color:#fff;font-family:Nunito;font-size:.8rem;font-weight:800;cursor:pointer;z-index:2;position:relative">+ Tambah Foto (maks 24)</button>
       </div>
-      <div class="upload-progress" id="upload-progress-galaxy"><div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div><span id="upload-text-galaxy">Uploading...</span></div>
+      <div class="upload-progress" id="upload-progress-galaxy">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div>
+        <span id="upload-text-galaxy" style="flex:1">Uploading...</span>
+      </div>
+      <div style="width:100%;height:3px;background:rgba(249,168,201,.15);border-radius:2px;overflow:hidden;margin-top:2px">
+        <div id="upload-bar-galaxy" style="height:100%;background:linear-gradient(90deg,var(--pk2),var(--gold));border-radius:2px;width:0%;transition:width .4s ease"></div>
+      </div>
+    </div>
       <div class="photo-items" id="photo-items-galaxy"></div>
     </div>
 
     <div class="adm-card">
       <div class="adm-card-title">🖨️ Foto Print <span class="badge">maks 10</span></div>
       <div class="dropzone" id="dropzone-print" ondragover="dzOver(event,'print')" ondragleave="dzLeave('print')" ondrop="dzDrop(event,'print')">
-        <input type="file" accept="image/*" multiple onchange="onFileChange(event,'print')">
-        <div class="dz-icon">🖨️</div><div class="dz-text">Drag & drop / tap untuk pilih</div>
+        <input type="file" accept="image/*" multiple id="fileinput-print" style="display:none" onchange="onFileChange(event,'print')">
+        <div class="dz-icon">🖨️</div>
+        <div class="dz-text">Drag & drop di sini</div>
+        <button type="button" onclick="document.getElementById('fileinput-print').click()" style="margin-top:8px;padding:8px 20px;border:none;border-radius:100px;background:var(--pk2);color:#fff;font-family:Nunito;font-size:.8rem;font-weight:800;cursor:pointer;z-index:2;position:relative">+ Tambah Foto (maks 10)</button>
       </div>
-      <div class="upload-progress" id="upload-progress-print"><div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div><span id="upload-text-print">Uploading...</span></div>
+      <div class="upload-progress" id="upload-progress-print">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div>
+        <span id="upload-text-print" style="flex:1">Uploading...</span>
+      </div>
+      <div style="width:100%;height:3px;background:rgba(249,168,201,.15);border-radius:2px;overflow:hidden;margin-top:2px">
+        <div id="upload-bar-print" style="height:100%;background:linear-gradient(90deg,var(--pk2),var(--gold));border-radius:2px;width:0%;transition:width .4s ease"></div>
+      </div>
+    </div>
       <div class="photo-items" id="photo-items-print"></div>
     </div>
 
     <div class="adm-card">
       <div class="adm-card-title">📷 Foto Album <span class="badge">maks 30</span></div>
       <div class="dropzone" id="dropzone-album" ondragover="dzOver(event,'album')" ondragleave="dzLeave('album')" ondrop="dzDrop(event,'album')">
-        <input type="file" accept="image/*" multiple onchange="onFileChange(event,'album')">
-        <div class="dz-icon">📷</div><div class="dz-text">Drag & drop / tap untuk pilih</div>
+        <input type="file" accept="image/*" multiple id="fileinput-album" style="display:none" onchange="onFileChange(event,'album')">
+        <div class="dz-icon">📷</div>
+        <div class="dz-text">Drag & drop di sini</div>
+        <button type="button" onclick="document.getElementById('fileinput-album').click()" style="margin-top:8px;padding:8px 20px;border:none;border-radius:100px;background:var(--pk2);color:#fff;font-family:Nunito;font-size:.8rem;font-weight:800;cursor:pointer;z-index:2;position:relative">+ Tambah Foto (maks 30)</button>
       </div>
-      <div class="upload-progress" id="upload-progress-album"><div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div><span id="upload-text-album">Uploading...</span></div>
+      <div class="upload-progress" id="upload-progress-album">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div>
+        <span id="upload-text-album" style="flex:1">Uploading...</span>
+      </div>
+      <div style="width:100%;height:3px;background:rgba(249,168,201,.15);border-radius:2px;overflow:hidden;margin-top:2px">
+        <div id="upload-bar-album" style="height:100%;background:linear-gradient(90deg,var(--pk2),var(--gold));border-radius:2px;width:0%;transition:width .4s ease"></div>
+      </div>
+    </div>
       <div class="photo-items" id="photo-items-album"></div>
     </div>
 
     <div class="adm-card">
       <div class="adm-card-title">🎞️ Foto Ticker Bawah Album <span class="badge">maks 15</span></div>
       <div class="dropzone" id="dropzone-ticker" ondragover="dzOver(event,'ticker')" ondragleave="dzLeave('ticker')" ondrop="dzDrop(event,'ticker')">
-        <input type="file" accept="image/*" multiple onchange="onFileChange(event,'ticker')">
-        <div class="dz-icon">🎞️</div><div class="dz-text">Drag & drop / tap untuk pilih</div>
+        <input type="file" accept="image/*" multiple id="fileinput-ticker" style="display:none" onchange="onFileChange(event,'ticker')">
+        <div class="dz-icon">🎞️</div>
+        <div class="dz-text">Drag & drop di sini</div>
+        <button type="button" onclick="document.getElementById('fileinput-ticker').click()" style="margin-top:8px;padding:8px 20px;border:none;border-radius:100px;background:var(--pk2);color:#fff;font-family:Nunito;font-size:.8rem;font-weight:800;cursor:pointer;z-index:2;position:relative">+ Tambah Foto (maks 15)</button>
       </div>
-      <div class="upload-progress" id="upload-progress-ticker"><div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div><span id="upload-text-ticker">Uploading...</span></div>
+      <div class="upload-progress" id="upload-progress-ticker">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div>
+        <span id="upload-text-ticker" style="flex:1">Uploading...</span>
+      </div>
+      <div style="width:100%;height:3px;background:rgba(249,168,201,.15);border-radius:2px;overflow:hidden;margin-top:2px">
+        <div id="upload-bar-ticker" style="height:100%;background:linear-gradient(90deg,var(--pk2),var(--gold));border-radius:2px;width:0%;transition:width .4s ease"></div>
+      </div>
+    </div>
       <div class="photo-items" id="photo-items-ticker"></div>
     </div>
 
@@ -697,11 +737,19 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
       <div class="adm-card-title">💌 Pesan Tersembunyi (Amplop)</div>
       <div class="amplop-section">
         <div class="dropzone" id="dropzone-amplop" ondragover="dzOver(event,'amplop')" ondragleave="dzLeave('amplop')" ondrop="dzDrop(event,'amplop')">
-          <input type="file" accept="image/*" onchange="onFileChange(event,'amplop')">
+          <input type="file" accept="image/*" id="fileinput-amplop" style="display:none" onchange="onFileChange(event,'amplop')">
           <div class="amplop-preview" id="amplop-preview-wrap"><div class="amplop-preview-empty">📷</div></div>
-          <div class="dz-text" style="font-size:.72rem">Foto opsional (tap untuk pilih)</div>
+          <button type="button" onclick="document.getElementById('fileinput-amplop').click()" style="margin-top:6px;padding:7px 16px;border:none;border-radius:100px;background:var(--gold);color:var(--dark);font-family:Nunito;font-size:.75rem;font-weight:800;cursor:pointer;z-index:2;position:relative">+ Pilih Foto</button>
         </div>
-        <div class="upload-progress" id="upload-progress-amplop"><div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div><span id="upload-text-amplop">Uploading...</span></div>
+        <div class="upload-progress" id="upload-progress-amplop">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="upload-dot"></div><div class="upload-dot"></div><div class="upload-dot"></div>
+        <span id="upload-text-amplop" style="flex:1">Uploading...</span>
+      </div>
+      <div style="width:100%;height:3px;background:rgba(249,168,201,.15);border-radius:2px;overflow:hidden;margin-top:2px">
+        <div id="upload-bar-amplop" style="height:100%;background:linear-gradient(90deg,var(--pk2),var(--gold));border-radius:2px;width:0%;transition:width .4s ease"></div>
+      </div>
+    </div>
         <div class="field"><label>Pesan Tersembunyi</label><textarea id="amplop-message" placeholder="Tulis pesan paling personal di sini...&#10;Ini yang paling terakhir dibuka." style="min-height:80px"></textarea></div>
       </div>
     </div>
@@ -2173,26 +2221,69 @@ const POOLS={galaxy:{arr:()=>photosGalaxy,max:24},print:{arr:()=>photosPrint,max
 
 async function processFiles(files,pool){
   if(pool==='amplop'){await processAmplop(files[0]);return;}
-  const cfg=POOLS[pool];const arr=cfg.arr();const maxN=cfg.max;
+  const cfg=POOLS[pool];const arr=getPoolArr(pool);const maxN=cfg.max;
   const toAdd=files.slice(0,maxN-arr.length);
-  if(!toAdd.length){alert(`Maks ${maxN} foto!`);return;}
+  if(!toAdd.length){alert(`Maks ${maxN} foto untuk ${pool}! Hapus beberapa dulu.`);return;}
   const key=document.getElementById('imgbb-key').value.trim();
   if(!key){alert('Masukkan ImgBB API key dulu!');return;}
+
   const prog=document.getElementById('upload-progress-'+pool);
   const progText=document.getElementById('upload-text-'+pool);
   prog.style.display='flex';
+
+  let successCount=0, failCount=0;
+
   for(let i=0;i<toAdd.length;i++){
-    const file=toAdd[i];progText.textContent=`Uploading ${i+1}/${toAdd.length}: ${file.name}`;
-    try{
-      const url=await uploadToImgBB(file);
-      const preview=await readPreview(file);
-      const target=pool==='galaxy'?photosGalaxy:pool==='print'?photosPrint:pool==='album'?photosAlbum:photosTicker;
-      target.push({url,name:file.name,cap:'',preview});
-      renderPhotoItems(pool);autoSave();
-    }catch(e){alert(`Gagal upload ${file.name}: ${e.message}`);}
+    const file=toAdd[i];
+    progText.textContent=`📤 ${i+1}/${toAdd.length}: ${file.name} (${successCount} berhasil)`;
+    const barEl=document.getElementById('upload-bar-'+pool);
+    if(barEl)barEl.style.width=Math.round((i/toAdd.length)*100)+'%';
+
+    // Retry up to 3x per file
+    let uploaded=false;
+    for(let attempt=1;attempt<=3;attempt++){
+      try{
+        if(attempt>1){
+          progText.textContent=`🔄 Retry ${attempt}/3: ${file.name}`;
+          await sleep(1500*attempt); // backoff
+        }
+        const [url, preview]=await Promise.all([
+          uploadToImgBB(file),
+          readPreview(file)
+        ]);
+        getPoolArr(pool).push({url,name:file.name,cap:'',preview});
+        renderPhotoItems(pool);
+        autoSave();
+        successCount++;
+        uploaded=true;
+        const barEl2=document.getElementById('upload-bar-'+pool);
+        if(barEl2)barEl2.style.width=Math.round((successCount/toAdd.length)*100)+'%';
+        break;
+      }catch(e){
+        console.warn(`Upload attempt ${attempt} failed for ${file.name}:`, e.message);
+        if(attempt===3){
+          failCount++;
+          progText.textContent=`❌ Gagal: ${file.name} — lanjut...`;
+          await sleep(800);
+        }
+      }
+    }
+
+    // Jeda antar file supaya gak kena rate limit
+    if(i < toAdd.length-1) await sleep(600);
   }
+
   prog.style.display='none';
+
+  if(failCount>0){
+    const msg=`Upload selesai: ${successCount} berhasil, ${failCount} gagal.\n\nTips:\n• Coba upload ulang foto yang gagal\n• Pastikan koneksi stabil\n• File terlalu besar? Coba foto < 5MB`;
+    alert(msg);
+  } else {
+    progText.textContent=`✓ Semua ${successCount} foto berhasil!`;
+  }
 }
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
 async function processAmplop(file){
   if(!file)return;
@@ -2215,22 +2306,46 @@ function setAmplopPreview(url){
 
 function readPreview(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});}
 
+function getPoolArr(pool){return pool==='galaxy'?photosGalaxy:pool==='print'?photosPrint:pool==='album'?photosAlbum:photosTicker;}
+function removePhoto(pool,i){getPoolArr(pool).splice(i,1);renderPhotoItems(pool);autoSave();}
+function updateCap(pool,i,val){getPoolArr(pool)[i].cap=val;autoSave();}
+
 function renderPhotoItems(pool){
-  const arr=pool==='galaxy'?photosGalaxy:pool==='print'?photosPrint:pool==='album'?photosAlbum:photosTicker;
+  const arr=getPoolArr(pool);
   const list=document.getElementById('photo-items-'+pool);list.innerHTML='';
   arr.forEach((p,i)=>{
     const item=document.createElement('div');item.className='photo-item';item.draggable=true;
-    item.ondragstart=()=>{_dragPool=pool;_dragIdx=i;};
-    item.ondragover=e=>e.preventDefault();
+    item.ondragstart=e=>{_dragPool=pool;_dragIdx=i;e.dataTransfer.effectAllowed='move';};
+    item.ondragover=e=>{e.preventDefault();e.dataTransfer.dropEffect='move';};
     item.ondrop=e=>{
       e.preventDefault();if(_dragIdx<0||_dragIdx===i||_dragPool!==pool)return;
-      const src=pool==='galaxy'?photosGalaxy:pool==='print'?photosPrint:pool==='album'?photosAlbum:photosTicker;
-      const m=src.splice(_dragIdx,1)[0];src.splice(i,0,m);_dragIdx=-1;renderPhotoItems(pool);autoSave();
+      const src=getPoolArr(pool);const m=src.splice(_dragIdx,1)[0];src.splice(i,0,m);_dragIdx=-1;renderPhotoItems(pool);autoSave();
     };
-    const pn=pool;
-    item.innerHTML=`<span class="photo-item-drag">⣿</span><img class="photo-item-thumb" src="${p.preview||p.url}" alt=""><div class="photo-item-body"><span class="photo-item-name">${p.name}</span><input class="photo-item-cap" placeholder="Caption..." value="${(p.cap||'').replace(/"/g,'&quot;')}" oninput="(${pn}==='galaxy'?photosGalaxy:${pn}==='print'?photosPrint:${pn}==='album'?photosAlbum:photosTicker)[${i}].cap=this.value;autoSave()"></div><button class="photo-item-remove" onclick="(${pn}==='galaxy'?photosGalaxy:${pn}==='print'?photosPrint:${pn}==='album'?photosAlbum:photosTicker).splice(${i},1);renderPhotoItems('${pn}');autoSave()">×</button>`;
+    // drag handle
+    const drag=document.createElement('span');drag.className='photo-item-drag';drag.textContent='⣿';
+    // thumb
+    const thumb=document.createElement('img');thumb.className='photo-item-thumb';thumb.src=p.preview||p.url;thumb.alt='';
+    // body
+    const body=document.createElement('div');body.className='photo-item-body';
+    const name=document.createElement('span');name.className='photo-item-name';name.textContent=p.name||'foto';
+    const cap=document.createElement('input');cap.className='photo-item-cap';cap.placeholder='Caption...';cap.value=p.cap||'';
+    cap.addEventListener('input',()=>{getPoolArr(pool)[i].cap=cap.value;autoSave();});
+    body.appendChild(name);body.appendChild(cap);
+    // remove btn
+    const rm=document.createElement('button');rm.className='photo-item-remove';rm.type='button';rm.textContent='×';
+    rm.addEventListener('click',e=>{e.stopPropagation();removePhoto(pool,i);});
+    rm.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();removePhoto(pool,i);},{passive:false});
+    item.appendChild(drag);item.appendChild(thumb);item.appendChild(body);item.appendChild(rm);
     list.appendChild(item);
   });
+}
+function updateCap(pool,i,val){
+  const arr=pool==='galaxy'?photosGalaxy:pool==='print'?photosPrint:pool==='album'?photosAlbum:photosTicker;
+  if(arr[i])arr[i].cap=val;autoSave();
+}
+function removePhoto(pool,i){
+  const arr=pool==='galaxy'?photosGalaxy:pool==='print'?photosPrint:pool==='album'?photosAlbum:photosTicker;
+  arr.splice(i,1);renderPhotoItems(pool);autoSave();
 }
 let _dragPool='',_dragIdx=-1;
 
