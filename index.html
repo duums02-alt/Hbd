@@ -2126,9 +2126,20 @@ function confetti(n){
 ═══════════════════════════════════════════ */
 async function uploadToImgBB(file){
   const key=document.getElementById('imgbb-key').value.trim();if(!key)throw new Error('API key kosong');
-  const form=new FormData();form.append('image',file);
-  const res=await fetch(`https://api.imgbb.com/1/upload?key=${key}`,{method:'POST',body:form});
-  const data=await res.json();if(!data.success)throw new Error(data.error?.message||'Upload gagal');
+  // Convert to base64
+  const b64=await new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=()=>rej(new Error('Gagal baca file'));
+    r.readAsDataURL(file);
+  });
+  const form=new FormData();
+  form.append('image',b64);
+  form.append('key',key);
+  const res=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:form});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const data=await res.json();
+  if(!data.success)throw new Error(data.error?.message||JSON.stringify(data));
   return data.data.url;
 }
 async function testImgBB(){
@@ -2137,7 +2148,8 @@ async function testImgBB(){
   st.textContent='Mengecek...';st.className='key-status';
   try{
     const b64='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-    const res=await fetch(`https://api.imgbb.com/1/upload?key=${key}`,{method:'POST',body:(()=>{const f=new FormData();f.append('image',b64);return f;})()});
+    const tf=new FormData();tf.append('image',b64);tf.append('key',key);
+    const res=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:tf});
     const data=await res.json();
     if(data.success){st.textContent='✓ Valid!';st.className='key-status ok';}
     else{st.textContent='✗ Tidak valid';st.className='key-status err';}
