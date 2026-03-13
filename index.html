@@ -19,10 +19,10 @@
   --ease-cinematic:cubic-bezier(.77,0,.18,1);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:#000;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:0}
+html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:#000;overflow:hidden;margin:0;padding:0}
 
 /* ═══ SCREENS ═══ */
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:10;transition:none;overflow:hidden}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:10;transition:none}
 .screen.active{opacity:1;pointer-events:auto}
 .screen.entering{animation:screenEnter 0s forwards}
 .screen.leaving{animation:screenLeave 0s forwards}
@@ -96,7 +96,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .loading-pct{font-size:.65rem;color:rgba(249,168,201,.4);letter-spacing:.12em;font-weight:700}
 
 /* ═══ SCREEN 2: ADMIN ═══ */
-#s-admin{background:linear-gradient(160deg,var(--dark) 0%,var(--dark2) 100%);z-index:10;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:32px 18px 120px;height:100%;position:fixed;inset:0}
+#s-admin{background:linear-gradient(160deg,var(--dark) 0%,var(--dark2) 100%);z-index:10;justify-content:flex-start;align-items:center;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:32px 18px 120px}
 .adm-wrap{width:100%;max-width:500px;display:flex;flex-direction:column;align-items:center;gap:0}
 .adm-logo{font-family:'Playfair Display',serif;font-size:1.45rem;color:#fff;text-align:center;margin-bottom:2px}
 .adm-logo span{color:var(--gold)}
@@ -220,7 +220,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .machine-error-sub{font-size:.62rem;color:rgba(249,168,201,.4);text-align:center}
 
 /* ═══ SCREEN 4: PRINT ═══ */
-#s-print{background:radial-gradient(ellipse at 50% 0%,#3d0a20 0%,#1a0410 50%,#0d0208 100%);z-index:10;justify-content:flex-start;overflow:hidden;height:100%;position:fixed;inset:0}
+#s-print{background:radial-gradient(ellipse at 50% 0%,#3d0a20 0%,#1a0410 50%,#0d0208 100%);z-index:10;flex-direction:column;justify-content:flex-start;align-items:center;overflow:hidden}
 .print-top{width:100%;max-width:380px;flex-shrink:0;z-index:10}
 .print-machine-mini{background:linear-gradient(180deg,#2a0e1c,#1e0814);border:2px solid rgba(249,168,201,.2);border-top:none;border-radius:0 0 16px 16px;padding:10px 16px 14px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.6)}
 .pmm-brand{font-family:'Playfair Display',serif;font-size:1rem;background:linear-gradient(135deg,var(--gold),var(--pk));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.06em}
@@ -229,9 +229,9 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .pmm-light{width:5px;height:5px;border-radius:50%;animation:lightBlink 1.2s ease-in-out infinite}
 .pmm-light:nth-child(1){background:var(--pk)}.pmm-light:nth-child(2){background:var(--gold);animation-delay:.2s}.pmm-light:nth-child(3){background:var(--mint);animation-delay:.4s}.pmm-light:nth-child(4){background:var(--lav);animation-delay:.6s}.pmm-light:nth-child(5){background:var(--pk);animation-delay:.8s}
 .print-slot-bar{height:12px;background:linear-gradient(180deg,#060103,#0d0208);border-left:2px solid rgba(249,168,201,.2);border-right:2px solid rgba(249,168,201,.2);box-shadow:inset 0 4px 8px rgba(0,0,0,.9)}
-.print-scroll-area{flex:1;width:100%;max-width:380px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:180px;min-height:0}
+.print-scroll-area{flex:1;width:100%;max-width:380px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:180px;min-height:0;display:flex;flex-direction:column}
 .print-scroll-area::-webkit-scrollbar{display:none}
-.print-paper{width:100%;background:linear-gradient(180deg,#fffbf8,#fff9f5);border-left:2px solid rgba(249,168,201,.12);border-right:2px solid rgba(249,168,201,.12);min-height:100%;position:relative}
+.print-paper{width:100%;background:linear-gradient(180deg,#fffbf8,#fff9f5);border-left:2px solid rgba(249,168,201,.12);border-right:2px solid rgba(249,168,201,.12);min-height:100%;position:relative;flex:1}
 .print-paper::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,transparent,rgba(249,168,201,.35),transparent)}
 .print-chat-area{padding:14px 14px 6px}
 .typing-wrap{display:flex;padding-right:44px;margin-bottom:7px;animation:fadeIn .3s ease both}
@@ -322,7 +322,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .lb-close-btn{padding:10px 28px;border:1.5px solid rgba(249,168,201,.4);border-radius:100px;background:transparent;color:rgba(249,168,201,.8);font-family:'Nunito';font-size:.82rem;font-weight:700;cursor:pointer}
 
 /* ═══ SCREEN 6: ALBUM ═══ */
-#s-album{background:linear-gradient(180deg,#fff0f6 0%,var(--cream) 35%,#fffaf0 100%);z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;align-items:stretch;height:100%;position:fixed;inset:0}
+#s-album{background:linear-gradient(180deg,#fff0f6 0%,var(--cream) 35%,#fffaf0 100%);z-index:10;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;justify-content:flex-start;align-items:center;flex-direction:column}
 .album-hdr{padding:28px 22px 12px;text-align:center;background:linear-gradient(180deg,rgba(255,240,246,.98),rgba(255,240,246,.6));position:sticky;top:0;z-index:50;backdrop-filter:blur(10px)}
 .album-name{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,5vw,2.2rem);color:var(--text);line-height:1.1}
 .album-name em{color:var(--pk2);font-style:italic}
@@ -573,7 +573,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 </div>
 
 <!-- SCREEN 2: ADMIN -->
-<div class="screen active" id="s-admin" style="position:relative;overflow-y:auto;justify-content:flex-start;padding:32px 18px 120px">
+<div class="screen active" id="s-admin">
   <div class="adm-wrap">
     <div class="adm-logo">🎂 <span>Birthday</span> Photobox</div>
     <div class="adm-sub">buat · cetak · kenang</div>
@@ -812,7 +812,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 </div>
 
 <!-- SCREEN 4: PRINT -->
-<div class="screen" id="s-print" style="justify-content:flex-start">
+<div class="screen" id="s-print">
   <div class="print-top" style="width:100%;max-width:380px;flex-shrink:0;z-index:10">
     <div class="print-machine-mini">
       <div class="pmm-brand" id="pmm-brand">✦ PhotoBox ✦</div>
