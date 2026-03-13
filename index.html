@@ -131,6 +131,8 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .photo-item-cap:focus{border-color:var(--pk)}
 .photo-item-remove{width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,100,120,.25);color:var(--pk);font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation}
 .photo-item-drag{cursor:grab;color:#6b4055;font-size:.9rem;flex-shrink:0;user-select:none}
+.print-sep{text-align:center;padding:8px 0;color:rgba(232,121,160,.4);font-size:.65rem;letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+.print-sep::before,.print-sep::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(232,121,160,.2),transparent)}
 .upload-progress{font-size:.72rem;color:var(--pk);margin-top:8px;min-height:36px;display:none;flex-direction:column;gap:4px;padding:8px 10px;background:rgba(249,168,201,.08);border-radius:8px;border:1px solid rgba(249,168,201,.15)}
 .upload-dot{width:5px;height:5px;border-radius:50%;background:var(--pk);animation:dotPulse .8s ease-in-out infinite}
 .upload-dot:nth-child(2){animation-delay:.15s}
@@ -279,7 +281,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .strip-tear-end::before{content:'';position:absolute;bottom:0;left:-5%;right:-5%;height:16px;background:linear-gradient(180deg,#fffbf8,transparent);clip-path:polygon(0% 0%,2% 70%,4% 20%,6% 80%,8% 30%,10% 90%,12% 40%,14% 85%,16% 25%,18% 75%,20% 35%,22% 95%,24% 45%,26% 80%,28% 20%,30% 70%,32% 30%,34% 85%,36% 40%,38% 90%,40% 35%,42% 75%,44% 25%,46% 80%,48% 45%,50% 95%,52% 40%,54% 85%,56% 30%,58% 75%,60% 20%,62% 70%,64% 35%,66% 90%,68% 25%,70% 80%,72% 40%,74% 85%,76% 30%,78% 70%,80% 20%,82% 75%,84% 35%,86% 90%,88% 45%,90% 85%,92% 30%,94% 70%,96% 25%,98% 65%,100% 15%,100% 0%)}
 /* reply dock */
 .reply-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(110%);width:100%;max-width:380px;z-index:700;background:rgba(255,244,250,.99);backdrop-filter:blur(24px);border-top:1px solid rgba(232,121,160,.2);padding:10px 14px 56px;transition:transform .42s cubic-bezier(.34,1.36,.64,1);box-shadow:0 -6px 28px rgba(200,80,130,.14)}
-.reply-dock.show{transform:translateX(-50%) translateY(0);bottom:72px}
+.reply-dock.show{transform:translateX(-50%) translateY(0);bottom:76px}
 .reply-hint-text{font-size:.63rem;color:var(--muted);text-align:center;margin-bottom:9px}
 .reply-row{display:flex;gap:9px;align-items:flex-end}
 .reply-preview-box{flex:1;background:#fff;border-radius:22px;border-bottom-right-radius:6px;padding:11px 15px;font-size:.84rem;color:var(--text);font-weight:500;border:1.5px solid rgba(232,121,160,.18);line-height:1.45;cursor:pointer;user-select:none}
@@ -288,7 +290,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 
 /* ═══ SCREEN 5: GALAXY ═══ */
 #s-galaxy{background:#000;z-index:10}
-#galaxy-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:none}
+#galaxy-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:none;pointer-events:auto}
 .galaxy-ui-top{position:absolute;top:0;left:0;right:0;z-index:10;pointer-events:none;padding:16px 16px 0}
 .galaxy-top-row{display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:auto}
 .galaxy-title{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(.9rem,3.5vw,1.3rem);background:linear-gradient(135deg,#fff 0%,var(--pk) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 14px rgba(249,168,201,.7));flex:1}
@@ -309,7 +311,7 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .galaxy-sentence.show{opacity:1}
 .galaxy-sentence-text{font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;color:#fff;text-shadow:0 0 20px rgba(249,168,201,.8);line-height:1.5}
 /* galaxy lightbox */
-#galaxy-lightbox{display:none;position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.92);backdrop-filter:blur(14px);flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px}
+#galaxy-lightbox{display:none;position:absolute;inset:0;z-index:100;background:rgba(0,0,0,.92);backdrop-filter:blur(14px);flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px}
 #galaxy-lightbox.on{display:flex;animation:fadeIn .28s ease both}
 .galaxy-lb-img-wrap{position:relative;width:100%;max-width:340px;display:flex;align-items:center;justify-content:center}
 #galaxy-lb-img{max-width:100%;max-height:65vh;border-radius:16px;box-shadow:0 0 40px rgba(249,168,201,.35);object-fit:contain;display:block;animation:lbPop .4s var(--ease-out-back) both}
@@ -357,6 +359,11 @@ html{width:100%;height:100%;overflow:hidden}body{width:100%;height:100%;font-fam
 .album-grid{padding:8px 12px 20px;columns:2;column-gap:10px}
 .album-grid-item{break-inside:avoid;margin-bottom:10px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 16px rgba(200,100,140,.12);border:1px solid rgba(232,121,160,.08);cursor:pointer;position:relative;transition:transform .2s}
 .album-grid-item:active{transform:scale(.97)}
+.album-grid-item img{width:100%;display:block;object-fit:cover}
+.album-grid-item-cap{font-size:.68rem;font-style:italic;color:var(--muted);padding:5px 8px;text-align:center;font-family:'Playfair Display',serif;line-height:1.3}
+.album-grid-item-overlay{position:absolute;inset:0;background:rgba(232,121,160,.0);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:14px}
+.album-grid-item-overlay span{background:rgba(0,0,0,.5);color:#fff;padding:4px 10px;border-radius:100px;font-size:.65rem}
+.album-grid-item:hover .album-grid-item-overlay,.album-grid-item:active .album-grid-item-overlay{opacity:1}
 .album-grid-item.size-tall img{height:220px}
 .album-grid-item.size-wide{column-span:all}
 .album-grid-item.size-wide img{height:200px}
@@ -1336,10 +1343,11 @@ function startLoading(){
     ...(gData.photosAlbum||[]),
     ...(gData.photosTicker||[]),
     gData.amplopUrl?{url:gData.amplopUrl}:null,
-  ].filter(Boolean);
+  ].filter(p=>p&&p.url);
 
-  const total=Math.max(allPhotos.length,1);
-  let loaded=0;let msgIdx=0;
+  const total=allPhotos.length;
+  let loaded=0, glitchTriggered=false, msgIdx=0, finished=false;
+
   const bar=document.getElementById('loading-bar');
   const pct=document.getElementById('loading-pct');
   const statusEl=document.getElementById('loading-status');
@@ -1349,40 +1357,77 @@ function startLoading(){
   // cycle messages
   const msgInterval=setInterval(()=>{
     statusEl.style.opacity='0';
-    setTimeout(()=>{statusEl.textContent=LOADING_MESSAGES[msgIdx%LOADING_MESSAGES.length];statusEl.style.opacity='1';msgIdx++;},200);
-  },1200);
+    setTimeout(()=>{
+      statusEl.textContent=LOADING_MESSAGES[msgIdx%LOADING_MESSAGES.length];
+      statusEl.style.opacity='1';
+      msgIdx++;
+    },200);
+  },1100);
 
-  function onLoad(){
-    loaded++;
-    const p=Math.round((loaded/total)*100);
-    bar.style.width=p+'%';pct.textContent=p+'%';
-    if(loaded>=total){
-      clearInterval(msgInterval);
-      // at 80% trigger glitch
-      if(p>=80&&!_glitchDone){
-        _glitchDone=true;
-        triggerLoadingGlitch();
-      }
-      setTimeout(()=>{
-        statusEl.textContent='Siap! 🎉';
-        setTimeout(()=>{
-          transitionTo('s-loading','s-machine',()=>{
-            // music already playing (started in initGuestMode)
-          });
-        },600);
-      },400);
+  function setProgress(p){
+    bar.style.width=p+'%';
+    pct.textContent=p+'%';
+    // trigger glitch at 80%
+    if(p>=80&&!glitchTriggered&&!_glitchDone){
+      glitchTriggered=true;_glitchDone=true;
+      triggerLoadingGlitch();
     }
   }
 
-  // preload each photo
-  if(allPhotos.length===0){setTimeout(onLoad,1500);return;}
+  function onAllLoaded(){
+    if(finished)return;
+    finished=true;
+    clearInterval(msgInterval);
+    setProgress(100);
+    statusEl.style.opacity='0';
+    setTimeout(()=>{
+      statusEl.textContent='Siap! 🎉';
+      statusEl.style.opacity='1';
+      setTimeout(()=>{
+        transitionTo('s-loading','s-machine',null);
+      },700);
+    },400);
+  }
+
+  // No photos — fake progress then proceed
+  if(total===0){
+    let p=0;
+    const fake=setInterval(()=>{
+      p=Math.min(100,p+(8+Math.random()*12));
+      setProgress(Math.round(p));
+      if(p>=100){clearInterval(fake);onAllLoaded();}
+    },120);
+    return;
+  }
+
+  // Preload all photos, track individually (no double-count with setTimeout)
+  let countDone=0;
+  // Also run a fake progress in parallel so bar always moves even on slow loads
+  let fakeP=0;
+  const fakeInterval=setInterval(()=>{
+    const realP=total>0?Math.round((countDone/total)*100):0;
+    fakeP=Math.min(fakeP+2, realP, 95); // fake creeps up but never past real or 95%
+    setProgress(Math.max(fakeP,realP));
+  },150);
+
   allPhotos.forEach(p=>{
-    if(!p.url){onLoad();return;}
     const img=new Image();
-    img.onload=onLoad;img.onerror=onLoad;
+    img.crossOrigin='anonymous';
+    function done(){
+      countDone++;
+      const realP=Math.round((countDone/total)*100);
+      fakeP=realP; // snap fake to real
+      setProgress(realP);
+      if(countDone>=total){
+        clearInterval(fakeInterval);
+        onAllLoaded();
+      }
+    }
+    img.onload=done;
+    img.onerror=done; // count failures too so we always finish
     img.src=p.url;
-    // simulate min progress increment
-    setTimeout(()=>{if(loaded<total)onLoad();},3000+Math.random()*2000);
+    // Safety timeout per image: if stuck after 8s, count it as done anyway
+    setTimeout(()=>{if(!img.complete)done();},8000);
   });
 }
 let _glitchDone=false;
@@ -1858,6 +1903,9 @@ function _initThreeGalaxy(d,canvas){
   const raycaster=new THREE.Raycaster();
   function handleTap(cx,cy){
     if(document.getElementById('galaxy-lightbox').style.display==='flex'||document.getElementById('galaxy-lightbox').classList.contains('on'))return;
+    // Don't intercept taps on UI buttons
+    const el=document.elementFromPoint(cx,cy);
+    if(el&&(el.tagName==='BUTTON'||el.closest('button')))return;
     const rect=canvas.getBoundingClientRect();
     const mouse=new THREE.Vector2(((cx-rect.left)/rect.width)*2-1,-((cy-rect.top)/rect.height)*2+1);
     raycaster.setFromCamera(mouse,camera);
@@ -1987,10 +2035,11 @@ function buildAlbum(d){
   const tickerItems=(d.photosTicker||[]);
 
   /* ticker top (album photos auto) */
-  if(photoItems.length){
+  const tickerSource=photoItems.length?photoItems:(tickerItems.length?tickerItems:[]);
+  if(tickerSource.length){
     const tw=document.createElement('div');tw.className='album-ticker-wrap';
     const track=document.createElement('div');track.className='ticker-track';
-    const makeCards=()=>photoItems.map(p=>{const card=document.createElement('div');card.className='ticker-card';const img=document.createElement('img');img.src=p.url;img.alt='';img.loading='lazy';card.appendChild(img);const cap=document.createElement('div');cap.className='ticker-card-cap';cap.textContent=p.cap||'';card.appendChild(cap);return card;});
+    const makeCards=()=>tickerSource.map(p=>{const card=document.createElement('div');card.className='ticker-card';const img=document.createElement('img');img.src=p.url;img.alt='';img.loading='lazy';card.appendChild(img);const cap=document.createElement('div');cap.className='ticker-card-cap';cap.textContent=p.cap||'';card.appendChild(cap);return card;});
     makeCards().forEach(c=>track.appendChild(c));makeCards().forEach(c=>track.appendChild(c));
     tw.appendChild(track);
     let isDrag=false,stX=0,toff=0;
@@ -2013,8 +2062,8 @@ function buildAlbum(d){
   if(photoItems.length){
     const grid=document.createElement('div');grid.className='album-grid';
     // insert amplop at random position in grid (around middle)
-    const amplopPos=photoItems.length>3?Math.floor(photoItems.length/2):photoItems.length;
-    photoItems.forEach((item,i)=>{
+    const amplopPos=mainItems.length>3?Math.floor(mainItems.length/2):mainItems.length;
+    mainItems.forEach((item,i)=>{
       if(i===amplopPos&&d.amplopMsg){
         // amplop card
         const aDiv=document.createElement('div');aDiv.className='album-grid-item amplop size-normal';
@@ -2035,7 +2084,10 @@ function buildAlbum(d){
   }
 
   /* locked section */
-  const lockedItems=photoItems.slice(Math.floor(photoItems.length*.6));
+  // locked = last 30% of album photos, excluded from main grid
+  const lockedCutoff=Math.floor(photoItems.length*.7);
+  const mainItems=photoItems.slice(0,lockedCutoff);
+  const lockedItems=photoItems.slice(lockedCutoff);
   if(lockedItems.length>=2){
     const lockWrap=document.createElement('div');lockWrap.className='album-locked-section';lockWrap.id='album-locked';
     lockWrap.innerHTML=`<div class="lock-icon">🔒</div><div class="lock-text">Ada foto tersembunyi...<br>Buka dengan double tap 💓</div><div class="lock-hint">thump thump</div>`;
@@ -2076,7 +2128,15 @@ function buildAlbum(d){
 
   /* end */
   const end=document.createElement('div');end.className='album-end';
-  end.innerHTML=`<div class="album-end-big">🎂</div><div class="album-end-title">${d.name||'Kamu'}</div><div class="album-end-sub">${d.end||'Selamat ulang tahun!'}</div><button class="btn-main" style="margin-top:6px" onclick="showValidate('🎂','${tx.doneTitle||'Selesai deh!'}','${tx.doneSub||'Semua kenangan sudah terlewati.'}','${tx.doneBtn||'Happy birthday!! 🎉'}',()=>{closeValidate();transitionTo('s-album','s-ending',()=>initEnding());})">Selesai 🎉</button>`;
+  const endBig=document.createElement('div');endBig.className='album-end-big';endBig.textContent='🎂';
+  const endTitle=document.createElement('div');endTitle.className='album-end-title';endTitle.textContent=d.name||'Kamu';
+  const endSub=document.createElement('div');endSub.className='album-end-sub';endSub.textContent=d.end||'Selamat ulang tahun!';
+  const endBtn=document.createElement('button');endBtn.className='btn-main';endBtn.style.marginTop='6px';
+  endBtn.textContent=tx.albumDoneBtn||'Selesai 🎉';
+  endBtn.addEventListener('click',()=>{
+    transitionTo('s-album','s-ending',()=>initEnding());
+  });
+  end.appendChild(endBig);end.appendChild(endTitle);end.appendChild(endSub);end.appendChild(endBtn);
   content.appendChild(end);
 }
 
@@ -2134,17 +2194,18 @@ function initEnding(){
 }
 
 function endingClose(){
-  fadeMusicOut(2500,()=>{});
+  fadeMusicOut(1500,()=>{});
   const s=document.getElementById('s-ending');
   s.style.transition='opacity 1.2s ease';s.style.opacity='0';
   setTimeout(()=>{
     s.style.opacity='1';s.style.transition='';
-    // loop back to loading screen with different text
     if(gData){
-      document.getElementById('loading-for').textContent=`Paket sudah dibuka.`;
-      document.getElementById('loading-status').textContent=`Semoga kamu selalu ingat: kamu dicintai. 💕`;
+      // Reset loading screen to "already opened" state
+      document.getElementById('loading-for').textContent='Paket sudah dibuka.';
+      document.getElementById('loading-status').textContent='Semoga kamu selalu ingat: kamu dicintai. 💕';
       document.getElementById('loading-bar').style.width='100%';
       document.getElementById('loading-pct').textContent='';
+      _glitchDone=false; // allow glitch again if they somehow replay
       transitionTo('s-ending','s-loading',null);
     }
   },1200);
@@ -2172,30 +2233,58 @@ function confetti(n){
 /* ═══════════════════════════════════════════
    IMGBB + UPLOAD
 ═══════════════════════════════════════════ */
+// Compress image to max 1200px wide, quality 0.82 before upload
+function compressImage(file, maxW=1200, quality=0.82){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width, h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      // Return as base64 string (without data:...;base64, prefix)
+      const dataUrl=canvas.toDataURL('image/jpeg', quality);
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.onerror=()=>reject(new Error('Gagal baca gambar'));
+    img.src=url;
+  });
+}
+
 async function uploadToImgBB(file){
   const key=document.getElementById('imgbb-key').value.trim();
   if(!key)throw new Error('API key kosong');
-  // Read as base64
-  const b64=await new Promise((res,rej)=>{
-    const r=new FileReader();
-    r.onload=()=>res(r.result.split(',')[1]);
-    r.onerror=()=>rej(new Error('Gagal baca file'));
-    r.readAsDataURL(file);
-  });
-  // key di URL query param, image sebagai base64 di FormData
+
+  // Compress first
+  let b64;
+  try{
+    b64=await compressImage(file);
+  }catch(e){
+    // fallback: read raw
+    b64=await new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result.split(',')[1]);
+      r.onerror=()=>rej(new Error('Gagal baca file'));
+      r.readAsDataURL(file);
+    });
+  }
+
   const form=new FormData();
-  form.append('image',b64);
+  form.append('image', b64);
   let res,data;
   try{
     res=await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(key)}`,{
       method:'POST',
       body:form,
     });
-  }catch(e){throw new Error('Gagal konek ke ImgBB. Cek koneksi internet & pastikan tidak ada ad-blocker.');}
-  try{data=await res.json();}catch(e){throw new Error('Response ImgBB tidak valid (HTTP '+res.status+')');}
+  }catch(e){throw new Error('Gagal konek ImgBB. Cek internet / ad-blocker.');}
+  try{data=await res.json();}catch(e){throw new Error('Response tidak valid (HTTP '+res.status+')');}
   if(!res.ok||!data.success){
     const msg=data?.error?.message||data?.status_txt||('HTTP '+res.status);
-    throw new Error('ImgBB error: '+msg);
+    throw new Error('ImgBB: '+msg);
   }
   return data.data.url;
 }
@@ -2223,63 +2312,43 @@ async function processFiles(files,pool){
   if(pool==='amplop'){await processAmplop(files[0]);return;}
   const cfg=POOLS[pool];const arr=getPoolArr(pool);const maxN=cfg.max;
   const toAdd=files.slice(0,maxN-arr.length);
-  if(!toAdd.length){alert(`Maks ${maxN} foto untuk ${pool}! Hapus beberapa dulu.`);return;}
+  if(!toAdd.length){alert(`Maks ${maxN} foto untuk ${pool}!`);return;}
   const key=document.getElementById('imgbb-key').value.trim();
   if(!key){alert('Masukkan ImgBB API key dulu!');return;}
 
   const prog=document.getElementById('upload-progress-'+pool);
   const progText=document.getElementById('upload-text-'+pool);
+  const barEl=document.getElementById('upload-bar-'+pool);
   prog.style.display='flex';
+  progText.textContent=`⏳ Memproses ${toAdd.length} foto...`;
 
-  let successCount=0, failCount=0;
+  let done=0, failed=[];
 
-  for(let i=0;i<toAdd.length;i++){
-    const file=toAdd[i];
-    progText.textContent=`📤 ${i+1}/${toAdd.length}: ${file.name} (${successCount} berhasil)`;
-    const barEl=document.getElementById('upload-bar-'+pool);
-    if(barEl)barEl.style.width=Math.round((i/toAdd.length)*100)+'%';
-
-    // Retry up to 3x per file
-    let uploaded=false;
-    for(let attempt=1;attempt<=3;attempt++){
-      try{
-        if(attempt>1){
-          progText.textContent=`🔄 Retry ${attempt}/3: ${file.name}`;
-          await sleep(1500*attempt); // backoff
-        }
-        const [url, preview]=await Promise.all([
-          uploadToImgBB(file),
-          readPreview(file)
-        ]);
-        getPoolArr(pool).push({url,name:file.name,cap:'',preview});
-        renderPhotoItems(pool);
-        autoSave();
-        successCount++;
-        uploaded=true;
-        const barEl2=document.getElementById('upload-bar-'+pool);
-        if(barEl2)barEl2.style.width=Math.round((successCount/toAdd.length)*100)+'%';
-        break;
-      }catch(e){
-        console.warn(`Upload attempt ${attempt} failed for ${file.name}:`, e.message);
-        if(attempt===3){
-          failCount++;
-          progText.textContent=`❌ Gagal: ${file.name} — lanjut...`;
-          await sleep(800);
-        }
-      }
-    }
-
-    // Jeda antar file supaya gak kena rate limit
-    if(i < toAdd.length-1) await sleep(600);
+  function updateProgress(){
+    progText.textContent=`📤 ${done}/${toAdd.length} selesai${failed.length?` · ${failed.length} gagal`:''}`;
+    if(barEl)barEl.style.width=Math.round((done/toAdd.length)*100)+'%';
   }
 
-  prog.style.display='none';
+  // Upload all in parallel
+  await Promise.all(toAdd.map(async(file)=>{
+    try{
+      const [url, preview]=await Promise.all([uploadToImgBB(file), readPreview(file)]);
+      getPoolArr(pool).push({url,name:file.name,cap:'',preview});
+      done++;
+      updateProgress();
+      renderPhotoItems(pool);
+      autoSave();
+    }catch(e){
+      console.error('Upload failed:', file.name, e.message);
+      failed.push(file.name);
+      done++;
+      updateProgress();
+    }
+  }));
 
-  if(failCount>0){
-    const msg=`Upload selesai: ${successCount} berhasil, ${failCount} gagal.\n\nTips:\n• Coba upload ulang foto yang gagal\n• Pastikan koneksi stabil\n• File terlalu besar? Coba foto < 5MB`;
-    alert(msg);
-  } else {
-    progText.textContent=`✓ Semua ${successCount} foto berhasil!`;
+  prog.style.display='none';
+  if(failed.length){
+    alert(`${toAdd.length-failed.length} foto berhasil.\n\nGagal (${failed.length}):\n${failed.map(n=>'• '+n).join('\n')}\n\nCoba upload ulang foto yang gagal.`);
   }
 }
 
