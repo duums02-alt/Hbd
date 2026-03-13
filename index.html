@@ -22,7 +22,7 @@
 html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:#000;overflow:hidden;margin:0;padding:0}
 
 /* ═══ SCREENS ═══ */
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:10;transition:none}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:10;transition:none;overflow:hidden}
 .screen.active{opacity:1;pointer-events:auto}
 .screen.entering{animation:screenEnter 0s forwards}
 .screen.leaving{animation:screenLeave 0s forwards}
@@ -96,8 +96,8 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:#000
 .loading-pct{font-size:.65rem;color:rgba(249,168,201,.4);letter-spacing:.12em;font-weight:700}
 
 /* ═══ SCREEN 2: ADMIN ═══ */
-#s-admin{display:none;min-height:100%;width:100%;background:linear-gradient(160deg,var(--dark) 0%,var(--dark2) 100%);flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 18px 120px}
-.adm-wrap{width:100%;max-width:500px;display:flex;flex-direction:column;align-items:center;gap:0;min-height:calc(100vh + 1px)}
+#s-admin{background:linear-gradient(160deg,var(--dark) 0%,var(--dark2) 100%);overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;justify-content:flex-start;align-items:center;padding:0}
+.adm-wrap{width:100%;max-width:500px;padding:32px 18px 120px;display:flex;flex-direction:column;align-items:center;gap:0}
 .adm-logo{font-family:'Playfair Display',serif;font-size:1.45rem;color:#fff;text-align:center;margin-bottom:2px}
 .adm-logo span{color:var(--gold)}
 .adm-sub{font-size:.62rem;color:#6b4055;text-align:center;margin-bottom:20px;letter-spacing:.15em;text-transform:uppercase}
@@ -573,7 +573,7 @@ html,body{width:100%;height:100%;font-family:'Nunito',sans-serif;background:#000
 </div>
 
 <!-- SCREEN 2: ADMIN -->
-<div id="s-admin">
+<div class="screen active" id="s-admin">
   <div class="adm-wrap">
     <div class="adm-logo">🎂 <span>Birthday</span> Photobox</div>
     <div class="adm-sub">buat · cetak · kenang</div>
@@ -1114,37 +1114,14 @@ function transitionTo(fromId,toId,cb){
 }
 
 function showScreen(id){
-  // hide all screens
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  // hide admin specially
-  const adminEl=document.getElementById('s-admin');
-  if(adminEl)adminEl.style.display='none';
-  document.body.style.overflow='hidden';
-
+  document.querySelectorAll('.screen').forEach(s=>{
+    s.classList.remove('active');
+  });
   const next=document.getElementById(id);
-  if(!next)return;
-
-  // restore html/body for non-admin screens
-  if(id!=='s-admin'){
-    document.body.style.height='100%';
-    document.documentElement.style.height='100%';
-    document.documentElement.style.overflow='hidden';
-  }
-
-  if(id==='s-admin'){
-    // admin uses normal body scroll
-    adminEl.style.display='flex';
-    document.body.style.overflow='auto';
-    document.body.style.overflowX='hidden';
-    document.body.style.height='auto';
-    document.body.style.background='#1a0d14';
-    document.documentElement.style.overflow='auto';
-    document.documentElement.style.height='auto';
-  } else {
+  if(next){
     next.classList.add('active');
-    document.body.style.overflow='hidden';
+    try{next.scrollTop=0;}catch(e){}
   }
-  window.scrollTo(0,0);
 }
 
 /* ═══════════════════════════════════════════
