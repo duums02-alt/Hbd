@@ -960,6 +960,7 @@ function crossfade(newN){
   if(newN===curTrack||!gData)return;
   const ids=[gData.m1,gData.m2,gData.m3];
   const newId=ids[newN-1];if(!newId)return;
+  document.querySelector('.vinyl')?.classList.remove('paused');
   const oldN=curTrack;
   document.getElementById('yt'+newN).src=ytSrc(newId);
   setTimeout(()=>{
@@ -1027,7 +1028,20 @@ window.addEventListener('DOMContentLoaded',()=>{
   else initAdmin();
 });
 function initAdmin(){showScreen('s-admin');if(!loadSaved()){addBrow('right','Happy birthday!! 🎂🎉');addBrow('left','Ih apaan nih... 👀');setSt('','Belum ada data');}hookSave();}
-function initGuest(){if(gData.m1)setTimeout(()=>startMusic(1),500);showScreen('s-welcome');populateMachine();document.getElementById('welcome-btn').onclick=doFP;}
+function initGuest(){
+  // Always show music bar in guest mode
+  document.getElementById('music-bar').classList.add('on');
+  if(gData.m1){
+    document.getElementById('mbar-title').textContent='Musik Spesial';
+    setTimeout(()=>startMusic(1),500);
+  } else {
+    document.getElementById('mbar-title').textContent='Birthday Photobox 🎂';
+    document.querySelector('.vinyl').classList.add('paused');
+  }
+  showScreen('s-welcome');
+  populateMachine();
+  document.getElementById('welcome-btn').onclick=doFP;
+}
 
 /* ══ FINGERPRINT ══ */
 function doFP(){
